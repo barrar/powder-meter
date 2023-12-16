@@ -2,7 +2,12 @@ import SnowForecast from '../components/SnowForecast';
 import dayjs from "dayjs"
 
 async function getWeatherData() {
-  const res = await fetch('https://api.weather.gov/gridpoints/PDT/23,40')
+  const res = await fetch(
+    'https://api.weather.gov/gridpoints/PDT/23,40',
+    {
+      headers: { 'user-agent': '(modernsnow.com, contact@modernsnow.com)' }
+    }
+  )
   if (!res.ok) {
     throw new Error('Failed to fetch data')
   }
