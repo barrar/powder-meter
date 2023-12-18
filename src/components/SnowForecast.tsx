@@ -1,34 +1,50 @@
 'use client'
-import { BarChart } from "@mui/x-charts";
+import {
+    BarChart,
+    Bar,
+    XAxis,
+    YAxis,
+    Tooltip,
+    LabelList,
+    ResponsiveContainer,
+} from 'recharts';
+import { Props as LabelProps } from 'recharts/types/component/Label';
 
-const SnowForecast = ({ data }: { data: any }) => {
+const renderCustomizedLabel = (props: LabelProps) => {
+    const { x, y, width, value } = props
 
-    // dayjs().format()
-
-    return (
-
-        <BarChart
-            xAxis={[
-                {
-                    label: 'Day / Time',
-                    data: data.dates,
-                    scaleType: 'band'
-                },
-            ]}
-            series={[
-                {
-                    data: data.values,
-                },
-            ]}
-            yAxis={[
-                {
-                    label: 'Inches',
-                },
-            ]}
-
-            height={400}
-        />
+    return value === 0 ? null : (
+        <g>
+            <text
+                x={Number(x) + Number(width) / 2}
+                y={Number(y) - 10}
+                fill="#2570EA"
+                textAnchor="middle"
+                dominantBaseline="middle">
+                {value}
+            </text>
+        </g>
     )
 }
 
-export default SnowForecast;
+export default function SnowForecast({ data }: { data: any }) {
+    return (
+        <ResponsiveContainer width="100%" height={800}>
+            <BarChart
+                data={data}
+                margin={{
+                    top: 50,
+                    right: 0,
+                    left: 0,
+                    bottom: 20,
+                }}>
+                <XAxis dataKey="time" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="inches" fill="#2570EA" minPointSize={5}>
+                    <LabelList dataKey="inches" content={renderCustomizedLabel} />
+                </Bar>
+            </BarChart>
+        </ResponsiveContainer>
+    );
+}
