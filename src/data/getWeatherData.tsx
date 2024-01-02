@@ -1,9 +1,12 @@
 "use server"
 import dayjs from "dayjs"
+import utc from "dayjs/plugin/utc"
+
+dayjs.extend(utc)
 
 export async function getWeatherData() {
     const res = await fetch(
-        'https://api.weather.gov/gridpoints/PDT/23,40',
+        'https://api.weather.gov/gridpoints/PDT/23,39',
         {
             headers: { 'user-agent': '(modernsnow.com, contact@modernsnow.com)' },
             next: { revalidate: 10 }
@@ -21,7 +24,7 @@ export async function getWeatherData() {
         let inchesValue = Math.round(x.value * 0.0393701 * 10) / 10
 
         return {
-            time: dayjs(x.validTime.replace(/\/.*$/, ""))
+            time: dayjs.utc(x.validTime.replace(/\/.*$/, ""))
                 .format("dd ha")
                 .replace(/\m$/, ""), // Remove trailing m from am/pm
             inches: inchesValue !== 0 ? inchesValue : null
