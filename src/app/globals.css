@@ -3,13 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-rgb: 210, 210, 220;
+  --foreground-rgb: 229, 237, 255;
+  --background-rgb: 7, 15, 31;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background:  #ddeaff;
+  background: radial-gradient(120% 120% at 20% 20%, #1c2f59 0%, #0c1428 45%, #050a17 100%);
+  min-height: 100vh;
 }
 
-/* rgb(37, 112, 234) */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+  background-size: 60px 60px;
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+}

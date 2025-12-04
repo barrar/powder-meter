@@ -1,8 +1,9 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import ThemeRegistry from '../components/ThemeRegistry'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 
 export const metadata: Metadata = {
   title: 'Modern Snow',
@@ -15,11 +16,12 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html>
+    <html lang="en" className={inter.variable}>
       <body className={inter.className}>
-        <div className="flex">
+        <ThemeRegistry>
+          <div className="grain" aria-hidden />
           {children}
-        </div>
+        </ThemeRegistry>
       </body>
     </html>
   )
