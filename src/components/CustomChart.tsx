@@ -25,7 +25,7 @@ const warningTone = (point: ForecastPoint) => {
     return null
 }
 
-type TooltipProps = ChartsTooltipProps<'item'> & { points: ForecastPoint[] }
+type TooltipProps = ChartsTooltipProps & { points: ForecastPoint[] }
 
 const ForecastTooltip = ({ points, ...props }: TooltipProps) => {
     const tooltip = useItemTooltip<'bar'>()
