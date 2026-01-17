@@ -2,20 +2,17 @@
 
 import { Box, Chip, Divider, Grid, Paper, Stack, Typography } from '@mui/material'
 import { alpha } from '@mui/material/styles'
-import { BarChart } from '@mui/x-charts/BarChart'
+import { BarPlot } from '@mui/x-charts/BarChart'
+import { ChartContainer } from '@mui/x-charts/ChartContainer'
+import { ChartsGrid } from '@mui/x-charts/ChartsGrid'
+import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis'
+import { ChartsYAxis } from '@mui/x-charts/ChartsYAxis'
+import { LinePlot } from '@mui/x-charts/LineChart'
 import {
     ChartsTooltipContainer,
-    type ChartsTooltipProps,
     useAxesTooltip,
 } from '@mui/x-charts/ChartsTooltip'
 import type { ForecastPoint } from '../data/getWeatherData'
-
-const barColor = (point: ForecastPoint) => {
-    if (point.alert === 'rain') return '#f44336'
-    if (point.alert === 'light-precip') return '#f59e0b'
-    if (point.isBluebird) return '#60a5fa'
-    return '#5da2ff'
-}
 
 const warningTone = (point: ForecastPoint) => {
     if (point.alert === 'rain') return { label: 'Rain risk', color: 'error' as const }
@@ -25,9 +22,7 @@ const warningTone = (point: ForecastPoint) => {
     return null
 }
 
-type TooltipProps = ChartsTooltipProps & { points: ForecastPoint[] }
-
-const ForecastTooltip = ({ points, ...props }: TooltipProps) => {
+const ForecastTooltip = ({ points }: { points: ForecastPoint[] }) => {
     const tooltips = useAxesTooltip({ directions: ['x'] })
     const tooltip = tooltips?.[0]
     if (!tooltip) return null
@@ -37,61 +32,73 @@ const ForecastTooltip = ({ points, ...props }: TooltipProps) => {
     const tone = warningTone(point)
 
     return (
-        <ChartsTooltipContainer
-            {...props}
-            trigger="axis"
-            placement="right-start"
-        >
-            <Paper
-                elevation={0}
-                sx={{
-                    p: 2.25,
-                    minWidth: 220,
-                    borderRadius: 2,
-                    backdropFilter: 'blur(14px)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    background: 'linear-gradient(140deg, rgba(15,23,42,0.85), rgba(22,28,52,0.92))',
-                    boxShadow: '0 22px 60px rgba(4, 6, 18, 0.55)',
-                }}>
-                <Stack spacing={1.25}>
-                    <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
-                        <Typography variant="subtitle1" fontWeight={700}>
-                            {point.time}
-                        </Typography>
-                        <Stack direction="row" spacing={1}>
-                            {point.isBluebird && (
-                                <Chip size="small" label="Bluebird" color="primary" variant="outlined" />
-                            )}
-                            {tone && (
-                                <Chip size="small" label={tone.label} color={tone.color} variant="filled" />
-                            )}
-                        </Stack>
-                    </Stack>
-                    <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
-                    <Stack spacing={0.75}>
-                        <Stack direction="row" justifyContent="space-between">
-                            <Typography variant="body2" color="text.secondary">Snow</Typography>
-                            <Typography variant="subtitle1" fontWeight={700}>{point.inches ?? 0}&quot;</Typography>
-                        </Stack>
-                        <Stack direction="row" justifyContent="space-between">
-                            <Typography variant="body2" color="text.secondary">Precip</Typography>
-                            <Typography variant="subtitle1" fontWeight={700}>{point.precipInches ?? 0}&quot;</Typography>
-                        </Stack>
-                        {point.precipProbability != null && (
-                            <Stack direction="row" justifyContent="space-between">
-                                <Typography variant="body2" color="text.secondary">Precip chance</Typography>
-                                <Typography variant="subtitle1" fontWeight={700}>{point.precipProbability}%</Typography>
-                            </Stack>
+        <Paper
+            elevation={0}
+            sx={{
+                p: 2.25,
+                minWidth: 220,
+                borderRadius: 2,
+                backdropFilter: 'blur(14px)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'linear-gradient(140deg, rgba(15,23,42,0.85), rgba(22,28,52,0.92))',
+                boxShadow: '0 22px 60px rgba(4, 6, 18, 0.55)',
+            }}>
+            <Stack spacing={1.25}>
+                <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
+                    <Typography variant="subtitle1" fontWeight={700}>
+                        {point.time}
+                    </Typography>
+                    <Stack direction="row" spacing={1}>
+                        {point.isBluebird && (
+                            <Chip size="small" label="Bluebird" color="primary" variant="outlined" />
+                        )}
+                        {tone && (
+                            <Chip size="small" label={tone.label} color={tone.color} variant="filled" />
                         )}
                     </Stack>
-                    {point.warning && (
-                        <Typography variant="body2" sx={{ color: 'warning.light' }}>
-                            {point.warning}
-                        </Typography>
+                </Stack>
+                <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)' }} />
+                <Stack spacing={0.75}>
+                    <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" color="text.secondary">Snow</Typography>
+                        <Typography variant="subtitle1" fontWeight={700}>{point.inches ?? 0}&quot;</Typography>
+                    </Stack>
+                    <Stack direction="row" justifyContent="space-between">
+                        <Typography variant="body2" color="text.secondary">Precip</Typography>
+                        <Typography variant="subtitle1" fontWeight={700}>{point.precipInches ?? 0}&quot;</Typography>
+                    </Stack>
+                    {point.precipProbability != null && (
+                        <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="body2" color="text.secondary">Precip chance</Typography>
+                            <Typography variant="subtitle1" fontWeight={700}>{point.precipProbability}%</Typography>
+                        </Stack>
+                    )}
+                    {point.temperatureF != null && (
+                        <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="body2" color="text.secondary">Temperature</Typography>
+                            <Typography variant="subtitle1" fontWeight={700}>{Math.round(point.temperatureF)}°F</Typography>
+                        </Stack>
+                    )}
+                    {point.windMph != null && (
+                        <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="body2" color="text.secondary">Wind</Typography>
+                            <Typography variant="subtitle1" fontWeight={700}>{point.windMph} mph</Typography>
+                        </Stack>
+                    )}
+                    {point.cloudCover != null && (
+                        <Stack direction="row" justifyContent="space-between">
+                            <Typography variant="body2" color="text.secondary">Cloud cover</Typography>
+                            <Typography variant="subtitle1" fontWeight={700}>{point.cloudCover}%</Typography>
+                        </Stack>
                     )}
                 </Stack>
-            </Paper>
-        </ChartsTooltipContainer>
+                {point.warning && (
+                    <Typography variant="body2" sx={{ color: 'warning.light' }}>
+                        {point.warning}
+                    </Typography>
+                )}
+            </Stack>
+        </Paper>
     )
 }
 
@@ -133,36 +140,90 @@ export default function CustomChart({ data }: { data: ForecastPoint[] }) {
     const consolidatedWarnings = Array.from(warningMap.values())
         .sort((a, b) => a.startIndex - b.startIndex)
 
-    const alertDotColor = (alert: ForecastPoint['alert']) => {
-        if (alert === 'rain') return '#f87171'
-        if (alert === 'light-precip') return '#fbbf24'
-        if (alert === 'snow-ongoing') return '#93c5fd'
-        return '#a5b4fc'
-    }
-
-    const rainBands = (() => {
-        const bands: { start: number; end: number }[] = []
-        let current: { start: number; end: number } | null = null
-
-        data.forEach((point, idx) => {
-            if (point.alert === 'rain') {
-                if (!current) {
-                    current = { start: idx, end: idx }
-                    bands.push(current)
+        const alertDotColor = (alert: ForecastPoint['alert']) => {
+            if (alert === 'rain') return '#f87171'
+            if (alert === 'light-precip') return '#fbbf24'
+            if (alert === 'snow-ongoing') return '#93c5fd'
+            return '#a5b4fc'
+        }
+    
+        const rainBands = (() => {
+            const bands: { start: number; end: number }[] = []
+            let current: { start: number; end: number } | null = null
+    
+            data.forEach((point, idx) => {
+                if (point.alert === 'rain') {
+                    if (!current) {
+                        current = { start: idx, end: idx }
+                        bands.push(current)
+                    } else {
+                        current.end = idx
+                    }
                 } else {
-                    current.end = idx
+                    current = null
                 }
-            } else {
-                current = null
-            }
-        })
+            })
+    
+            return bands
+        })()
 
-        return bands
-    })()
+    const weatherSeries = [
+        {
+            id: 'temperature',
+            label: 'Temp (°F)',
+            type: 'line' as const,
+            dataKey: 'temperatureF',
+            yAxisId: 'weather',
+            color: '#fbbf24',
+            valueFormatter: (value: number | null) => value == null ? '' : `${Math.round(value)}°F`,
+            showMark: false,
+        },
+        {
+            id: 'wind',
+            label: 'Wind (mph)',
+            type: 'line' as const,
+            dataKey: 'windMph',
+            yAxisId: 'weather',
+            color: '#22c55e',
+            valueFormatter: (value: number | null) => value == null ? '' : `${value} mph`,
+            showMark: false,
+        },
+        {
+            id: 'cloud',
+            label: 'Cloud cover (%)',
+            type: 'line' as const,
+            dataKey: 'cloudCover',
+            yAxisId: 'weather',
+            color: '#a855f7',
+            valueFormatter: (value: number | null) => value == null ? '' : `${value}%`,
+            showMark: false,
+        },
+    ] as const
+
+    const series = [
+        {
+            id: 'snowfall',
+            label: 'Snow (in)',
+            type: 'bar' as const,
+            dataKey: 'inches',
+            yAxisId: 'snow',
+            minBarSize: 6,
+            color: '#5da2ff',
+            valueFormatter: (value: number | null) => value == null ? '' : `${value}"`,
+            barLabel: ({ value }: { value: number | null }) => value == null || value === 0 ? null : `${value}`,
+            barLabelPlacement: 'outside' as const,
+        },
+        ...weatherSeries,
+    ]
+
+    const legendItems = [
+        { id: 'snowfall', label: 'Snow (in)', color: '#5da2ff' },
+        ...weatherSeries,
+    ]
 
     return (
-        <Stack spacing={3.5}>
-            <Grid container spacing={2.5}>
+        <Stack spacing={3}>
+            <Grid container spacing={3}>
                 <Grid size={{ xs: 12, md: 6 }}>
                     <Paper
                         elevation={0}
@@ -265,17 +326,16 @@ export default function CustomChart({ data }: { data: ForecastPoint[] }) {
                     border: '1px solid rgba(255,255,255,0.08)',
                     boxShadow: '0 32px 90px rgba(0, 0, 0, 0.45)',
                 }}>
-                <Stack spacing={2} sx={{ mb: 1 }}>
+                <Stack sx={{ mb: 1 }}>
                     <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
                         <Typography variant="h5">Snowfall outlook</Typography>
-                        <Chip label="NOAA · Live" size="small" color="secondary" variant="outlined" />
                     </Stack>
                     <Typography variant="body2" color="text.secondary">
-                        Bars show expected snowfall for each window; hover for precipitation details and bluebird cues.
+                        Bars show expected snowfall for each window; lines show temperature, wind, and cloud cover.
                     </Typography>
                 </Stack>
 
-                <Box sx={{ position: 'relative', height: 620 }}>
+                <Box sx={{ position: 'relative', height: 520 }}>
                     <Box
                         sx={{
                             position: 'absolute',
@@ -308,47 +368,61 @@ export default function CustomChart({ data }: { data: ForecastPoint[] }) {
                             )
                         })}
                     </Box>
-                    <BarChart
-                        height={620}
+                    <ChartContainer
+                        height={520}
                         dataset={data}
+                        series={series}
                         xAxis={[{
+                            id: 'time',
                             dataKey: 'time',
                             scaleType: 'band',
                             tickLabelStyle: { fill: '#d7e3ff', fontSize: 12, fontWeight: 600 },
                         }]}
-                        yAxis={[{
-                            label: 'Snow (inches)',
-                            labelStyle: { fill: '#cbd5f5', fontSize: 12 },
-                            tickLabelStyle: { fill: '#cbd5f5', fontSize: 12 },
-                        }]}
-                        series={[
+                        yAxis={[
                             {
-                                id: 'snowfall',
-                                dataKey: 'inches',
-                                minBarSize: 6,
-                                valueFormatter: (value) => value == null ? '' : `${value}"`,
-                                barLabel: ({ value }) => value == null || value === 0 ? null : `${value}`,
-                                barLabelPlacement: 'outside',
-                                color: '#5da2ff',
-                                colorGetter: ({ dataIndex }) => barColor(data[dataIndex]),
+                                id: 'snow',
+                                label: 'Snow (inches)',
+                                labelStyle: { fill: '#cbd5f5', fontSize: 12 },
+                                tickLabelStyle: { fill: '#cbd5f5', fontSize: 12 },
+                            },
+                            {
+                                id: 'weather',
+                                label: 'Temp / Wind / Cloud',
+                                position: 'right',
+                                labelStyle: { fill: '#cbd5f5', fontSize: 12 },
+                                tickLabelStyle: { fill: '#cbd5f5', fontSize: 12 },
                             },
                         ]}
-                        grid={{ horizontal: true }}
-                        axisHighlight={{ x: 'band', y: 'none' }}
-                        margin={{ top: 24, right: 24, bottom: 32, left: 12 }}
-                        borderRadius={10}
-                        hideLegend
-                        slots={{
-                            tooltip: (tooltipProps) => (
-                                <ForecastTooltip {...tooltipProps} points={data} />
-                            ),
-                        }}
-                        slotProps={{
-                            tooltip: { trigger: 'axis' },
-                            barLabel: { style: { fill: '#e5edff', fontSize: 12, fontWeight: 700 } },
-                        }}
-                    />
+                        margin={{ top: 24, right: 36, bottom: 32, left: 12 }}
+                    >
+                        <ChartsGrid horizontal />
+                        <BarPlot
+                            slotProps={{
+                                barLabel: { style: { fill: '#e5edff', fontSize: 12, fontWeight: 700 } },
+                            }}
+                        />
+                        <LinePlot />
+                        <ChartsXAxis axisId="time" />
+                        <ChartsYAxis axisId="snow" />
+                        <ChartsYAxis axisId="weather" />
+                        <ChartsTooltipContainer trigger="axis" placement="right-start">
+                            <ForecastTooltip points={data} />
+                        </ChartsTooltipContainer>
+                    </ChartContainer>
                 </Box>
+
+                <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+                    <Stack direction="row" spacing={2} flexWrap="wrap" justifyContent="flex-end">
+                        {legendItems.map((series) => (
+                            <Stack key={series.id} direction="row" spacing={0.75} alignItems="center">
+                                <Box sx={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: series.color }} />
+                                <Typography variant="caption">
+                                    {series.label}
+                                </Typography>
+                            </Stack>
+                        ))}
+                    </Stack>
+                </Stack>
             </Paper>
         </Stack>
     )

@@ -1,8 +1,20 @@
 import { Box, Container, Paper, Stack, Typography } from '@mui/material'
 import { Suspense } from 'react'
+import LocationMenu from '../components/LocationMenu'
 import SnowForecast from '../components/SnowForecast'
+import { forecastLocations, getForecastLocation } from '../data/forecastLocations'
 
-export default async function Page() {
+type PageProps = {
+  searchParams?: { location?: string | string[] } | Promise<{ location?: string | string[] }>
+}
+
+export default async function Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams
+  const locationParam = Array.isArray(resolvedSearchParams?.location)
+    ? resolvedSearchParams?.location[0]
+    : resolvedSearchParams?.location
+  const location = getForecastLocation(locationParam)
+
   return (
     <Box sx={{ minHeight: '100vh', py: { xs: 4, md: 6 } }}>
       <Container maxWidth="lg">
@@ -17,19 +29,27 @@ export default async function Page() {
               boxShadow: '0 30px 80px rgba(6, 12, 28, 0.35)',
             }}>
             <Stack spacing={2.5}>
-              <Stack spacing={1}>
-                <Typography variant="h3" component="h1">
-                  Mt. Bachelor snow forecast
-                </Typography>
-                <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 820 }}>
-                  A quick, visual snowfall outlook for Mt. Bachelor in Bend, Oregon—powered by live NOAA data.
-                </Typography>
+              <Stack
+                direction={{ xs: 'column', md: 'row' }}
+                spacing={2}
+                alignItems={{ xs: 'flex-start', md: 'center' }}
+                justifyContent="space-between"
+              >
+                <Stack spacing={1}>
+                  <Typography variant="h3" component="h1">
+                    {location.title}
+                  </Typography>
+                  <Typography variant="body1" sx={{ color: 'text.secondary', maxWidth: 820 }}>
+                    {location.description}
+                  </Typography>
+                </Stack>
+                <LocationMenu locations={forecastLocations} value={location.id} />
               </Stack>
             </Stack>
           </Paper>
 
           <Suspense fallback={<Typography variant="body2">Loading NOAA forecast…</Typography>}>
-            <SnowForecast />
+            <SnowForecast locationId={location.id} />
           </Suspense>
         </Stack>
       </Container>
