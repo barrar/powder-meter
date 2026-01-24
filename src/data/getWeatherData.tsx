@@ -6,8 +6,8 @@ import { getForecastLocation, type ForecastLocationId } from "./forecastLocation
 
 dayjs.extend(utc)
 
-const CACHE_TTL_MS = 60 * 60 * 1000
-const CACHE_TTL_SECONDS = 60 * 60
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000
+const CACHE_TTL_SECONDS = 6 * 60 * 60
 
 type RedisClient = ReturnType<typeof createClient>
 
@@ -15,7 +15,7 @@ let redisClient: RedisClient | null = null
 let redisClientPromise: Promise<RedisClient | null> | null = null
 
 const getRedisClient = async (): Promise<RedisClient | null> => {
-    const redisUrl = process.env.REDIS_URL
+    const redisUrl = process.env.REDIS_ROSE_OCEAN_REDIS_URL
     if (!redisUrl) return null
     if (redisClient) return redisClient
     if (!redisClientPromise) {
@@ -167,7 +167,7 @@ export async function getWeatherData(locationId?: ForecastLocationId): Promise<F
             `https://api.weather.gov/gridpoints/${location.gridpoints.office}/${location.gridpoints.x},${location.gridpoints.y}`,
             {
                 headers: { 'user-agent': '(modernsnow.com, contact@modernsnow.com)' },
-                next: { revalidate: 10 }
+                cache: "no-store"
             }
         )
         if (!res.ok) {
