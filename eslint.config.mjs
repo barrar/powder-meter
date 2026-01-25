@@ -1,13 +1,13 @@
-process.env.BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA = 'true'
-process.env.BROWSERSLIST_IGNORE_OLD_DATA = 'true'
+process.env.BASELINE_BROWSER_MAPPING_IGNORE_OLD_DATA = "true";
+process.env.BROWSERSLIST_IGNORE_OLD_DATA = "true";
 
-import nextConfig from 'eslint-config-next/core-web-vitals'
+import nextConfig from "eslint-config-next/core-web-vitals";
 
 const config = [
   {
-    ignores: ['**/node_modules/**'],
+    ignores: ["**/node_modules/**"],
   },
   ...nextConfig,
-]
+];
 
-export default config
+export default config;
