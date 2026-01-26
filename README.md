@@ -7,9 +7,10 @@ Live demo: https://modern-snow.vercel.app
 ## What It Does
 
 - Pulls the latest NOAA gridpoint forecast for the selected resort.
-- Normalizes each forecast window (snowfall, total precip, precip probability, temperature, wind, and cloud cover).
-- Highlights bluebird windows and flags rain risk, light precip, or ongoing snow.
-- Renders an interactive chart with snowfall bars, weather overlays, and rich tooltips.
+- Normalizes each forecast window (snowfall, total precip, precip probability, temperature, wind, wind gusts, and cloud cover).
+- Flags rain and high-wind windows, summarizing each alert with average chance/precip totals or peak gusts.
+- Highlights bluebird windows when fresh powder clears without additional precip.
+- Renders an interactive chart with snowfall bars, weather overlays, warning bands, and rich tooltips.
 - Lets users pick a state, resort, and time zone (defaults to the browser time zone when available).
 
 ## Tech Stack

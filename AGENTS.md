@@ -26,5 +26,5 @@
 ## Testing Guidelines
 
 - No tests exist
-- For now, verify changes by running `npm run lint`
+- For now, verify changes by running eslint, use MCP if available
 - When testing data code, capture a fixture of the NOAA response to avoid network flakiness.
