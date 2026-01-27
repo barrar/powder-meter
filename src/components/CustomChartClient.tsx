@@ -9,7 +9,6 @@ import {
   buildBluebirdWindows,
   buildChartData,
   buildChartLayout,
-  buildRainBands,
   buildWarningDetails,
   buildWarnings,
   buildXAxisTicks,
@@ -36,13 +35,12 @@ export default function CustomChartClient({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  const formatters = createTimeFormatters(timeZone, isMobile);
+  const formatters = createTimeFormatters(timeZone);
   const chartData = buildChartData(data, formatters);
   const warningDetails = buildWarningDetails(buildWarnings(chartData), chartData);
   const bluebirdWindows = buildBluebirdWindows(chartData);
-  const rainBands = buildRainBands(chartData);
   const xAxisTicks = buildXAxisTicks(chartData);
-  const { chartHeight, chartMargin, bandInset } = buildChartLayout(isMobile);
+  const { chartHeight, chartMargin } = buildChartLayout(isMobile);
   const resolvedIndex =
     activeIndex != null && chartData[activeIndex] ? activeIndex : null;
   const activePoint =
@@ -62,13 +60,11 @@ export default function CustomChartClient({
 
       <ChartPanel
         chartData={chartData}
-        rainBands={rainBands}
         xAxisTicks={xAxisTicks}
         dayFormatter={formatters.dayFormatter}
         isMobile={isMobile}
         chartHeight={chartHeight}
         chartMargin={chartMargin}
-        bandInset={bandInset}
         legendItems={legendItems}
         lineSeries={lineSeries}
         activePoint={activePoint}

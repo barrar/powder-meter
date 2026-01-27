@@ -54,10 +54,6 @@ export type LegendItem = {
   color: string;
 };
 
-export type RainBand = {
-  start: number;
-  end: number;
-};
 
 export type ChartMargin = {
   top: number;
@@ -66,17 +62,9 @@ export type ChartMargin = {
   left: number;
 };
 
-export type BandInset = {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
 export type ChartLayout = {
   chartHeight: number;
   chartMargin: ChartMargin;
-  bandInset: BandInset;
 };
 
 export type TimeFormatters = {
@@ -143,12 +131,9 @@ const formatInches = (value: number | null) => {
 const normalizeTimeLabel = (value: string) =>
   value.replace(/\s/g, "").toLowerCase();
 
-export const createTimeFormatters = (
-  timeZone: TimeZoneId,
-  isMobile: boolean,
-): TimeFormatters => ({
+export const createTimeFormatters = (timeZone: TimeZoneId): TimeFormatters => ({
   dayFormatter: new Intl.DateTimeFormat("en-US", {
-    weekday: isMobile ? "narrow" : "short",
+    weekday: "short",
     timeZone,
   }),
   dateFormatter: new Intl.DateTimeFormat("en-US", {
@@ -422,26 +407,6 @@ export const buildWarningDetails = (
     };
   });
 
-export const buildRainBands = (chartData: ChartPoint[]) => {
-  const bands: RainBand[] = [];
-  let current: RainBand | null = null;
-
-  chartData.forEach((point, idx) => {
-    if (point.showRainRisk) {
-      if (!current) {
-        current = { start: idx, end: idx };
-        bands.push(current);
-      } else {
-        current.end = idx;
-      }
-    } else {
-      current = null;
-    }
-  });
-
-  return bands;
-};
-
 export const buildBluebirdWindows = (
   chartData: ChartPoint[],
 ): BluebirdWindow[] =>
@@ -466,12 +431,6 @@ export const buildChartLayout = (isMobile: boolean): ChartLayout => {
     bottom: isMobile ? 28 : 32,
     left: isMobile ? 16 : 26,
   };
-  const bandInset = {
-    top: chartMargin.top,
-    bottom: chartMargin.bottom,
-    left: isMobile ? 8 : 12,
-    right: chartMargin.right,
-  };
 
-  return { chartHeight, chartMargin, bandInset };
+  return { chartHeight, chartMargin };
 };

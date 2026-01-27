@@ -1,13 +1,11 @@
 "use client";
 
 import type {
-  BandInset,
   BluebirdWindow,
   ChartMargin,
   ChartPoint,
   LegendItem,
   LineSeries,
-  RainBand,
   WarningDetail,
 } from "@/components/customChartData";
 import {
@@ -507,70 +505,24 @@ const ChartLegend = ({ items }: ChartLegendProps) => (
   </Stack>
 );
 
-type RainBandsProps = {
-  bands: RainBand[];
-  totalPoints: number;
-  inset: BandInset;
-};
-
-const RainBands = ({ bands, totalPoints, inset }: RainBandsProps) => (
-  <Box
-    sx={{
-      position: "absolute",
-      top: inset.top,
-      bottom: inset.bottom,
-      left: inset.left,
-      right: inset.right,
-      pointerEvents: "none",
-      overflow: "hidden",
-    }}
-  >
-    {bands.map((band, idx) => {
-      const safeTotal = totalPoints || 1;
-      const left = (band.start / safeTotal) * 100;
-      const width = ((band.end - band.start + 1) / safeTotal) * 100;
-      return (
-        <Box
-          key={`rain-band-${band.start}-${band.end}-${idx}`}
-          sx={{
-            position: "absolute",
-            top: 0,
-            bottom: 0,
-            left: `${left}%`,
-            width: `${width}%`,
-            background: chartColors.rainBand.fill,
-            backdropFilter: "blur(2px)",
-            borderLeft: `1px solid ${chartColors.rainBand.borderLeft}`,
-            borderRight: `1px solid ${chartColors.rainBand.borderRight}`,
-          }}
-        />
-      );
-    })}
-  </Box>
-);
-
 type ChartSurfaceProps = {
   chartData: ChartPoint[];
-  rainBands: RainBand[];
   xAxisTicks: string[];
   dayFormatter: Intl.DateTimeFormat;
   isMobile: boolean;
   chartHeight: number;
   chartMargin: ChartMargin;
-  bandInset: BandInset;
   lineSeries: LineSeries[];
   onSelectPoint?: (index: number) => void;
 };
 
 const ChartSurface = ({
   chartData,
-  rainBands,
   xAxisTicks,
   dayFormatter,
   isMobile,
   chartHeight,
   chartMargin,
-  bandInset,
   lineSeries,
   onSelectPoint,
 }: ChartSurfaceProps) => (
@@ -586,7 +538,6 @@ const ChartSurface = ({
         position: "relative",
         height: chartHeight,
         minHeight: chartHeight,
-        minWidth: isMobile ? 800 : 0,
         width: "100%",
         userSelect: "none",
         WebkitUserSelect: "none",
@@ -620,16 +571,11 @@ const ChartSurface = ({
         },
       }}
     >
-      <RainBands
-        bands={rainBands}
-        totalPoints={chartData.length}
-        inset={bandInset}
-      />
       <ResponsiveContainer
         width="100%"
         height={chartHeight}
         minHeight={chartHeight}
-        minWidth={isMobile ? 800 : 320}
+        minWidth={750}
       >
         <ComposedChart
           data={chartData}
@@ -739,13 +685,11 @@ const ChartSurface = ({
 
 type ChartPanelProps = {
   chartData: ChartPoint[];
-  rainBands: RainBand[];
   xAxisTicks: string[];
   dayFormatter: Intl.DateTimeFormat;
   isMobile: boolean;
   chartHeight: number;
   chartMargin: ChartMargin;
-  bandInset: BandInset;
   legendItems: LegendItem[];
   lineSeries: LineSeries[];
   activePoint: ChartPoint | null;
@@ -754,13 +698,11 @@ type ChartPanelProps = {
 
 export const ChartPanel = ({
   chartData,
-  rainBands,
   xAxisTicks,
   dayFormatter,
   isMobile,
   chartHeight,
   chartMargin,
-  bandInset,
   legendItems,
   lineSeries,
   activePoint,
@@ -783,13 +725,11 @@ export const ChartPanel = ({
 
     <ChartSurface
       chartData={chartData}
-      rainBands={rainBands}
       xAxisTicks={xAxisTicks}
       dayFormatter={dayFormatter}
       isMobile={isMobile}
       chartHeight={chartHeight}
       chartMargin={chartMargin}
-      bandInset={bandInset}
       lineSeries={lineSeries}
       onSelectPoint={onSelectPoint}
     />
