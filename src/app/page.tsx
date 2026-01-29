@@ -60,7 +60,7 @@ export default async function Page({ searchParams }: PageProps) {
                 <Typography variant="h3" component="h1">
                   Powder Meter
                 </Typography>
-                <Typography variant="body1">A quick, visual snow centric forcast</Typography>
+                <Typography variant="body1">A quick, visual snow-centric forecast</Typography>
               </Stack>
               <LocationMenu {...menu} />
             </Stack>
@@ -80,7 +80,7 @@ export default async function Page({ searchParams }: PageProps) {
           >
             <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2}>
               <Typography variant="body2" color="text.secondary">
-                {`\u00a9 ${new Date().getFullYear()} Jeremiah Barrar`}
+                {`© ${new Date().getFullYear()} Jeremiah Barrar`}
               </Typography>
               <Button
                 href="https://github.com/barrar/powder-meter"
