@@ -31,5 +31,8 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",
     "typescript": "^5.3.3"
+  },
+  "prettier": {
+    "printWidth": 140
   }
 }

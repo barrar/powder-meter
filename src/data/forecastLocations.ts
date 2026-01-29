@@ -50,12 +50,7 @@ export type ForecastLocationId =
   | "arapahoe-basin"
   | "telluride";
 
-export type ForecastState =
-  | "oregon"
-  | "washington"
-  | "california"
-  | "utah"
-  | "colorado";
+export type ForecastState = "oregon" | "washington" | "california" | "utah" | "colorado";
 
 export type ForecastStateOption = {
   id: ForecastState;
@@ -389,16 +384,11 @@ export const forecastLocations: ForecastLocation[] = [
 
 export const defaultLocationId: ForecastLocationId = "bachelor";
 
-export const getForecastState = (id?: string) =>
-  forecastStates.find((state) => state.id === id)?.id ?? defaultStateId;
+export const getForecastState = (id?: string) => forecastStates.find((state) => state.id === id)?.id ?? defaultStateId;
 
 export const getForecastLocation = (id?: string) => {
   const targetId = id ?? defaultLocationId;
-  return (
-    forecastLocations.find((location) => location.id === targetId) ??
-    forecastLocations[0]
-  );
+  return forecastLocations.find((location) => location.id === targetId) ?? forecastLocations[0];
 };
 
-export const getForecastLocationsForState = (stateId: ForecastState) =>
-  forecastLocations.filter((location) => location.state === stateId);
+export const getForecastLocationsForState = (stateId: ForecastState) => forecastLocations.filter((location) => location.state === stateId);

@@ -5,9 +5,7 @@
     "description": "weather.gov API",
     "version": "3.4.0"
   },
-  "servers": [
-    { "url": "https://api.weather.gov", "description": "Production server" }
-  ],
+  "servers": [{ "url": "https://api.weather.gov", "description": "Production server" }],
   "paths": {
     "/alerts": {
       "get": {
@@ -276,9 +274,7 @@
       "get": {
         "description": "Returns metadata about a Center Weather Service Unit",
         "operationId": "cwsu",
-        "parameters": [
-          { "$ref": "#/components/parameters/NWSCenterWeatherServiceUnitId" }
-        ],
+        "parameters": [{ "$ref": "#/components/parameters/NWSCenterWeatherServiceUnitId" }],
         "responses": {
           "200": {
             "description": "success",
@@ -298,9 +294,7 @@
       "get": {
         "description": "Returns a list of Center Weather Advisories from a CWSU",
         "operationId": "cwas",
-        "parameters": [
-          { "$ref": "#/components/parameters/NWSCenterWeatherServiceUnitId" }
-        ],
+        "parameters": [{ "$ref": "#/components/parameters/NWSCenterWeatherServiceUnitId" }],
         "responses": {
           "200": {
             "description": "success",
@@ -407,10 +401,7 @@
       "get": {
         "description": "Returns a list of SIGMET/AIRMETs for the specified ATSU for the specified date",
         "operationId": "sigmetsByATSUByDate",
-        "parameters": [
-          { "$ref": "#/components/parameters/ATSUIdentifier" },
-          { "$ref": "#/components/parameters/Date" }
-        ],
+        "parameters": [{ "$ref": "#/components/parameters/ATSUIdentifier" }, { "$ref": "#/components/parameters/Date" }],
         "responses": {
           "200": {
             "description": "success",
@@ -875,9 +866,7 @@
       "get": {
         "description": "Returns Terminal Aerodrome Forecasts for the specified airport station.",
         "operationId": "tafs",
-        "parameters": [
-          { "$ref": "#/components/parameters/ObservationStationId" }
-        ],
+        "parameters": [{ "$ref": "#/components/parameters/ObservationStationId" }],
         "responses": {
           "200": {
             "description": "success",
@@ -945,9 +934,7 @@
       "get": {
         "description": "Returns metadata about a given observation station",
         "operationId": "obs_station",
-        "parameters": [
-          { "$ref": "#/components/parameters/ObservationsStationFeatureFlags" }
-        ],
+        "parameters": [{ "$ref": "#/components/parameters/ObservationsStationFeatureFlags" }],
         "responses": {
           "200": {
             "description": "success",
@@ -1092,10 +1079,7 @@
         },
         "parameters": []
       },
-      "parameters": [
-        { "$ref": "#/components/parameters/Latitude" },
-        { "$ref": "#/components/parameters/Longitude" }
-      ]
+      "parameters": [{ "$ref": "#/components/parameters/Latitude" }, { "$ref": "#/components/parameters/Longitude" }]
     },
     "/points/{latitude},{longitude}/radio": {
       "get": {
@@ -1118,10 +1102,7 @@
         },
         "parameters": []
       },
-      "parameters": [
-        { "$ref": "#/components/parameters/Latitude" },
-        { "$ref": "#/components/parameters/Longitude" }
-      ]
+      "parameters": [{ "$ref": "#/components/parameters/Latitude" }, { "$ref": "#/components/parameters/Longitude" }]
     },
     "/points/{latitude},{longitude}/stations": {
       "get": {
@@ -1134,10 +1115,7 @@
         "deprecated": true,
         "parameters": []
       },
-      "parameters": [
-        { "$ref": "#/components/parameters/Latitude" },
-        { "$ref": "#/components/parameters/Longitude" }
-      ]
+      "parameters": [{ "$ref": "#/components/parameters/Latitude" }, { "$ref": "#/components/parameters/Longitude" }]
     },
     "/radar/servers": {
       "get": {
@@ -2292,20 +2270,7 @@
           "status": { "$ref": "#/components/schemas/AlertStatus" },
           "messageType": { "$ref": "#/components/schemas/AlertMessageType" },
           "category": {
-            "enum": [
-              "Met",
-              "Geo",
-              "Safety",
-              "Security",
-              "Rescue",
-              "Fire",
-              "Health",
-              "Env",
-              "Transport",
-              "Infra",
-              "CBRNE",
-              "Other"
-            ],
+            "enum": ["Met", "Geo", "Safety", "Security", "Rescue", "Fire", "Health", "Env", "Transport", "Infra", "CBRNE", "Other"],
             "type": "string",
             "description": "The code denoting the category of the subject event of the alert message."
           },
@@ -2339,17 +2304,7 @@
             "nullable": true
           },
           "response": {
-            "enum": [
-              "Shelter",
-              "Evacuate",
-              "Prepare",
-              "Execute",
-              "Avoid",
-              "Monitor",
-              "Assess",
-              "AllClear",
-              "None"
-            ],
+            "enum": ["Shelter", "Evacuate", "Prepare", "Execute", "Avoid", "Monitor", "Assess", "AllClear", "None"],
             "type": "string",
             "description": "The code denoting the type of action recommended for the target audience.\nThis corresponds to responseType in the CAP specification.\n"
           },
@@ -2610,10 +2565,7 @@
         "xml": { "name": "feed", "namespace": "http://www.w3.org/2005/Atom" }
       },
       "AreaCode": {
-        "oneOf": [
-          { "$ref": "#/components/schemas/StateTerritoryCode" },
-          { "$ref": "#/components/schemas/MarineAreaCode" }
-        ],
+        "oneOf": [{ "$ref": "#/components/schemas/StateTerritoryCode" }, { "$ref": "#/components/schemas/MarineAreaCode" }],
         "description": "State/territory codes and marine area codes"
       },
       "ATSUIdentifier": {
@@ -2848,13 +2800,7 @@
                     "value": {
                       "type": "array",
                       "items": {
-                        "required": [
-                          "coverage",
-                          "weather",
-                          "intensity",
-                          "visibility",
-                          "attributes"
-                        ],
+                        "required": ["coverage", "weather", "intensity", "visibility", "attributes"],
                         "type": "object",
                         "properties": {
                           "coverage": {
@@ -2909,12 +2855,7 @@
                             "nullable": true
                           },
                           "intensity": {
-                            "enum": [
-                              "very_light",
-                              "light",
-                              "moderate",
-                              "heavy"
-                            ],
+                            "enum": ["very_light", "light", "moderate", "heavy"],
                             "type": "string",
                             "nullable": true
                           },
@@ -2964,11 +2905,7 @@
                     "value": {
                       "type": "array",
                       "items": {
-                        "required": [
-                          "phenomenon",
-                          "significance",
-                          "event_number"
-                        ],
+                        "required": ["phenomenon", "significance", "event_number"],
                         "type": "object",
                         "properties": {
                           "phenomenon": {
@@ -3128,10 +3065,7 @@
             "description": "Indicates whether this period is daytime or nighttime."
           },
           "temperature": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/QuantitativeValue" },
-              { "type": "integer" }
-            ],
+            "oneOf": [{ "$ref": "#/components/schemas/QuantitativeValue" }, { "type": "integer" }],
             "description": "High/low temperature for the period, depending on whether the period is day or night.\nThis property as an integer value is deprecated. Future versions will express this value as a quantitative value object. To make use of the future standard format now, set the \"forecast_temperature_qv\" feature flag on the request.\n"
           },
           "temperatureUnit": {
@@ -3159,39 +3093,16 @@
             "description": "Relative humidity. Only provided in hourly forecasts.\n"
           },
           "windSpeed": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/QuantitativeValue" },
-              { "type": "string" }
-            ],
+            "oneOf": [{ "$ref": "#/components/schemas/QuantitativeValue" }, { "type": "string" }],
             "description": "Wind speed for the period.\nThis property as an string value is deprecated. Future versions will express this value as a quantitative value object. To make use of the future standard format now, set the \"forecast_wind_speed_qv\" feature flag on the request.\n"
           },
           "windGust": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/QuantitativeValue" },
-              { "type": "string" }
-            ],
+            "oneOf": [{ "$ref": "#/components/schemas/QuantitativeValue" }, { "type": "string" }],
             "description": "Peak wind gust for the period.\nThis property as an string value is deprecated. Future versions will express this value as a quantitative value object. To make use of the future standard format now, set the \"forecast_wind_speed_qv\" feature flag on the request.\n",
             "nullable": true
           },
           "windDirection": {
-            "enum": [
-              "N",
-              "NNE",
-              "NE",
-              "ENE",
-              "E",
-              "ESE",
-              "SE",
-              "SSE",
-              "S",
-              "SSW",
-              "SW",
-              "WSW",
-              "W",
-              "WNW",
-              "NW",
-              "NNW"
-            ],
+            "enum": ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"],
             "type": "string",
             "description": "The prevailing direction of the wind for the period, using a 16-point compass."
           },
@@ -3241,10 +3152,7 @@
             "description": "Indicates whether this period is daytime or nighttime."
           },
           "temperature": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/QuantitativeValue" },
-              { "type": "integer" }
-            ],
+            "oneOf": [{ "$ref": "#/components/schemas/QuantitativeValue" }, { "type": "integer" }],
             "description": "High/low temperature for the period, depending on whether the period is day or night.\nThis property as an integer value is deprecated. Future versions will express this value as a quantitative value object. To make use of the future standard format now, set the \"forecast_temperature_qv\" feature flag on the request.\n"
           },
           "temperatureUnit": {
@@ -3264,39 +3172,16 @@
             "description": "Probability of precipitation for the period."
           },
           "windSpeed": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/QuantitativeValue" },
-              { "type": "string" }
-            ],
+            "oneOf": [{ "$ref": "#/components/schemas/QuantitativeValue" }, { "type": "string" }],
             "description": "Wind speed for the period.\nThis property as an string value is deprecated. Future versions will express this value as a quantitative value object. To make use of the future standard format now, set the \"forecast_wind_speed_qv\" feature flag on the request.\n"
           },
           "windGust": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/QuantitativeValue" },
-              { "type": "string" }
-            ],
+            "oneOf": [{ "$ref": "#/components/schemas/QuantitativeValue" }, { "type": "string" }],
             "description": "Peak wind gust for the period.\nThis property as an string value is deprecated. Future versions will express this value as a quantitative value object. To make use of the future standard format now, set the \"forecast_wind_speed_qv\" feature flag on the request.\n",
             "nullable": true
           },
           "windDirection": {
-            "enum": [
-              "N",
-              "NNE",
-              "NE",
-              "ENE",
-              "E",
-              "ESE",
-              "SE",
-              "SSE",
-              "S",
-              "SSW",
-              "SW",
-              "WSW",
-              "W",
-              "WNW",
-              "NW",
-              "NNW"
-            ],
+            "enum": ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"],
             "type": "string",
             "description": "The prevailing direction of the wind for the period, using a 16-point compass."
           },
@@ -3411,23 +3296,7 @@
         "description": "Land region code. These correspond to the six NWS regional headquarters:\n* AR: Alaska Region\n* CR: Central Region\n* ER: Eastern Region\n* PR: Pacific Region\n* SR: Southern Region\n* WR: Western Region\n"
       },
       "MarineAreaCode": {
-        "enum": [
-          "AM",
-          "AN",
-          "GM",
-          "LC",
-          "LE",
-          "LH",
-          "LM",
-          "LO",
-          "LS",
-          "PH",
-          "PK",
-          "PM",
-          "PS",
-          "PZ",
-          "SL"
-        ],
+        "enum": ["AM", "AN", "GM", "LC", "LE", "LH", "LM", "LO", "LS", "PH", "PK", "PM", "PS", "PZ", "SL"],
         "type": "string",
         "description": "Marine area code as defined in NWS Directive 10-302:\n* AM: Western North Atlantic Ocean and along U.S. East Coast south of Currituck Beach Light NC following the coastline into Gulf of Mexico to Ocean Reef FL including the Caribbean\n* AN: Western North Atlantic Ocean and along U.S. East Coast from Canadian border south to Currituck Beach Light NC\n* GM: Gulf of Mexico and along the U.S. Gulf Coast from the Mexican border to Ocean Reef FL\n* LC: Lake St. Clair\n* LE: Lake Erie\n* LH: Lake Huron\n* LM: Lake Michigan\n* LO: Lake Ontario\n* LS: Lake Superior\n* PH: Central Pacific Ocean including Hawaiian waters\n* PK: North Pacific Ocean near Alaska and along Alaska coastline including the Bering Sea and the Gulf of Alaska\n* PM: Western Pacific Ocean including Mariana Island waters\n* PS: South Central Pacific Ocean including American Samoa waters\n* PZ: Eastern North Pacific Ocean and along U.S. West Coast from Canadian border to Mexican border\n* SL: St. Lawrence River above St. Regis\n"
       },
@@ -3446,15 +3315,7 @@
             "nullable": true
           },
           "modifier": {
-            "enum": [
-              "patches",
-              "blowing",
-              "low_drifting",
-              "freezing",
-              "shallow",
-              "partial",
-              "showers"
-            ],
+            "enum": ["patches", "blowing", "low_drifting", "freezing", "shallow", "partial", "showers"],
             "type": "string",
             "nullable": true
           },
@@ -3686,16 +3547,7 @@
         "description": "UGC identifier for a NWS forecast zone or county.\nThe first two letters will correspond to either a state code or marine area code (see #/components/schemas/StateTerritoryCode and #/components/schemas/MarineAreaCode for lists of valid letter combinations).\nThe third letter will be Z for public/fire zone or C for county.\n"
       },
       "NWSZoneType": {
-        "enum": [
-          "land",
-          "marine",
-          "forecast",
-          "public",
-          "coastal",
-          "offshore",
-          "fire",
-          "county"
-        ],
+        "enum": ["land", "marine", "forecast", "public", "coastal", "offshore", "fire", "county"],
         "type": "string"
       },
       "Observation": {
@@ -4031,10 +3883,7 @@
           "forecastGridData": { "type": "string", "format": "uri" },
           "observationStations": { "type": "string", "format": "uri" },
           "relativeLocation": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/RelativeLocationGeoJson" },
-              { "$ref": "#/components/schemas/RelativeLocationJsonLd" }
-            ]
+            "oneOf": [{ "$ref": "#/components/schemas/RelativeLocationGeoJson" }, { "$ref": "#/components/schemas/RelativeLocationJsonLd" }]
           },
           "forecastZone": { "type": "string", "format": "uri" },
           "county": { "type": "string", "format": "uri" },
@@ -4072,14 +3921,7 @@
         "type": "string"
       },
       "ProblemDetail": {
-        "required": [
-          "type",
-          "title",
-          "status",
-          "detail",
-          "instance",
-          "correlationId"
-        ],
+        "required": ["type", "title", "status", "detail", "instance", "correlationId"],
         "type": "object",
         "properties": {
           "type": {
@@ -4148,10 +3990,7 @@
         "additionalProperties": false
       },
       "RegionCode": {
-        "oneOf": [
-          { "$ref": "#/components/schemas/LandRegionCode" },
-          { "$ref": "#/components/schemas/MarineRegionCode" }
-        ]
+        "oneOf": [{ "$ref": "#/components/schemas/LandRegionCode" }, { "$ref": "#/components/schemas/MarineRegionCode" }]
       },
       "RelativeLocation": {
         "type": "object",
@@ -4368,10 +4207,7 @@
           "effectiveDate": { "type": "string", "format": "date-time" },
           "expirationDate": { "type": "string", "format": "date-time" },
           "state": {
-            "oneOf": [
-              { "$ref": "#/components/schemas/StateTerritoryCode" },
-              { "enum": [""], "type": "string", "nullable": true }
-            ]
+            "oneOf": [{ "$ref": "#/components/schemas/StateTerritoryCode" }, { "enum": [""], "type": "string", "nullable": true }]
           },
           "forecastOffice": { "type": "string", "format": "uri" },
           "gridIdentifier": { "type": "string" },

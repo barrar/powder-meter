@@ -1,27 +1,9 @@
 "use client";
 
-import type {
-  BluebirdWindow,
-  ChartMargin,
-  ChartPoint,
-  LegendItem,
-  LineSeries,
-  WarningDetail,
-} from "@/components/customChartData";
-import {
-  chartColors,
-  surfaceGradient,
-  tooltipGradient,
-} from "@/data/chartStyles";
+import type { BluebirdWindow, ChartMargin, ChartPoint, LegendItem, LineSeries, WarningDetail } from "@/components/customChartData";
+import { chartColors, surfaceGradient, tooltipGradient } from "@/data/chartStyles";
 import { Box, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
-import {
-  Cloud,
-  CloudRain,
-  Droplets,
-  Snowflake,
-  Thermometer,
-  Wind,
-} from "lucide-react";
+import { Cloud, CloudRain, Droplets, Snowflake, Thermometer, Wind } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   Bar,
@@ -53,12 +35,7 @@ const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
   if (value == null) return null;
   const numeric = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numeric) || numeric === 0) return null;
-  if (
-    typeof x !== "number" ||
-    typeof y !== "number" ||
-    typeof width !== "number"
-  )
-    return null;
+  if (typeof x !== "number" || typeof y !== "number" || typeof width !== "number") return null;
 
   const labelText = String(numeric);
   const rectHeight = 18;
@@ -144,9 +121,7 @@ type MobileLegendProps = {
 
 const MobileLegend = ({ point }: MobileLegendProps) => {
   const placeholder = "-";
-  const titleText = point
-    ? point.rangeLabel
-    : "Select an area of the chart to view details.";
+  const titleText = point ? point.rangeLabel : "Select an area of the chart to view details.";
 
   return (
     <Stack spacing={1}>
@@ -171,86 +146,45 @@ const MobileLegend = ({ point }: MobileLegendProps) => {
             label: "Snow",
             value: point ? `${point.inches ?? 0}"` : placeholder,
             color: chartColors.snow,
-            icon: (
-              <Snowflake
-                size={18}
-                color={chartColors.snow}
-                strokeWidth={2.25}
-              />
-            ),
+            icon: <Snowflake size={18} color={chartColors.snow} strokeWidth={2.25} />,
           },
           {
             key: "precip",
             label: "Precipitation",
             value: point ? `${point.precipInches ?? 0}"` : placeholder,
             color: chartColors.precipProbability,
-            icon: (
-              <CloudRain
-                size={18}
-                color={chartColors.precipProbability}
-                strokeWidth={2.25}
-              />
-            ),
+            icon: <CloudRain size={18} color={chartColors.precipProbability} strokeWidth={2.25} />,
           },
           {
             key: "chance",
             label: "Rain chance",
             value: point ? `${point.precipProbability ?? 0}%` : placeholder,
             color: chartColors.precipProbability,
-            icon: (
-              <Droplets
-                size={18}
-                color={chartColors.precipProbability}
-                strokeWidth={2.25}
-              />
-            ),
+            icon: <Droplets size={18} color={chartColors.precipProbability} strokeWidth={2.25} />,
           },
           {
             key: "temp",
             label: "Temperature",
-            value:
-              point && point.temperatureF != null
-                ? `${Math.round(point.temperatureF)}°F`
-                : placeholder,
+            value: point && point.temperatureF != null ? `${Math.round(point.temperatureF)}°F` : placeholder,
             color: chartColors.temperature,
-            icon: (
-              <Thermometer
-                size={18}
-                color={chartColors.temperature}
-                strokeWidth={2.25}
-              />
-            ),
+            icon: <Thermometer size={18} color={chartColors.temperature} strokeWidth={2.25} />,
           },
           {
             key: "wind",
             label: "Wind",
-            value:
-              point && point.windMph != null
-                ? `${point.windMph} mph`
-                : placeholder,
+            value: point && point.windMph != null ? `${point.windMph} mph` : placeholder,
             color: chartColors.wind,
-            icon: (
-              <Wind size={18} color={chartColors.wind} strokeWidth={2.25} />
-            ),
+            icon: <Wind size={18} color={chartColors.wind} strokeWidth={2.25} />,
           },
           {
             key: "cloud",
             label: "Cloud cover",
-            value:
-              point && point.cloudCover != null
-                ? `${point.cloudCover}%`
-                : placeholder,
+            value: point && point.cloudCover != null ? `${point.cloudCover}%` : placeholder,
             color: chartColors.cloud,
-            icon: (
-              <Cloud size={18} color={chartColors.cloud} strokeWidth={2.25} />
-            ),
+            icon: <Cloud size={18} color={chartColors.cloud} strokeWidth={2.25} />,
           },
         ].map((metric) => (
-          <Stack
-            key={metric.key}
-            alignItems="center"
-            sx={{ flex: "0 1 100px" }}
-          >
+          <Stack key={metric.key} alignItems="center" sx={{ flex: "0 1 100px" }}>
             <Box
               sx={{
                 width: 20,
@@ -265,11 +199,7 @@ const MobileLegend = ({ point }: MobileLegendProps) => {
             <Typography variant="caption" color={metric.color} fontWeight={700}>
               {metric.label}
             </Typography>
-            <Typography
-              variant="subtitle1"
-              color={metric.color}
-              fontWeight={700}
-            >
+            <Typography variant="subtitle1" color={metric.color} fontWeight={700}>
               {metric.value}
             </Typography>
           </Stack>
@@ -283,16 +213,10 @@ type ForecastTooltipProps = TooltipContentProps<number, string> & {
   points: ChartPoint[];
 };
 
-const ForecastTooltip = ({
-  active,
-  payload,
-  activeIndex,
-  points,
-}: ForecastTooltipProps) => {
+const ForecastTooltip = ({ active, payload, activeIndex, points }: ForecastTooltipProps) => {
   if (!active) return null;
   const payloadPoint = payload?.[0]?.payload as ChartPoint | undefined;
-  const fallbackPoint =
-    typeof activeIndex === "number" ? points[activeIndex] : undefined;
+  const fallbackPoint = typeof activeIndex === "number" ? points[activeIndex] : undefined;
   const point = payloadPoint ?? fallbackPoint;
   if (!point) return null;
   return (
@@ -310,12 +234,7 @@ const ForecastTooltip = ({
       }}
     >
       <Stack spacing={1.25}>
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          spacing={1}
-        >
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1}>
           <Typography variant="subtitle1" fontWeight={700}>
             {point.rangeLabel}
           </Typography>
@@ -326,50 +245,26 @@ const ForecastTooltip = ({
             label="Snow"
             value={`${point.inches ?? 0}"`}
             color={chartColors.snow}
-            icon={
-              <Snowflake
-                size={18}
-                color={chartColors.snow}
-                strokeWidth={2.25}
-              />
-            }
+            icon={<Snowflake size={18} color={chartColors.snow} strokeWidth={2.25} />}
           />
           <MetricRow
             label="Precipitation"
             value={`${point.precipInches ?? 0}"`}
             color={chartColors.precipProbability}
-            icon={
-              <CloudRain
-                size={18}
-                color={chartColors.precipProbability}
-                strokeWidth={2.25}
-              />
-            }
+            icon={<CloudRain size={18} color={chartColors.precipProbability} strokeWidth={2.25} />}
           />
           <MetricRow
             label="Rain chance"
             value={`${point.precipProbability ?? 0}%`}
             color={chartColors.precipProbability}
-            icon={
-              <Droplets
-                size={18}
-                color={chartColors.precipProbability}
-                strokeWidth={2.25}
-              />
-            }
+            icon={<Droplets size={18} color={chartColors.precipProbability} strokeWidth={2.25} />}
           />
           {point.temperatureF != null && (
             <MetricRow
               label="Temperature"
               value={`${Math.round(point.temperatureF)}\u00b0F`}
               color={chartColors.temperature}
-              icon={
-                <Thermometer
-                  size={18}
-                  color={chartColors.temperature}
-                  strokeWidth={2.25}
-                />
-              }
+              icon={<Thermometer size={18} color={chartColors.temperature} strokeWidth={2.25} />}
             />
           )}
           {point.windMph != null && (
@@ -377,9 +272,7 @@ const ForecastTooltip = ({
               label="Wind"
               value={`${point.windMph} mph`}
               color={chartColors.wind}
-              icon={
-                <Wind size={18} color={chartColors.wind} strokeWidth={2.25} />
-              }
+              icon={<Wind size={18} color={chartColors.wind} strokeWidth={2.25} />}
             />
           )}
           {point.cloudCover != null && (
@@ -387,9 +280,7 @@ const ForecastTooltip = ({
               label="Cloud cover"
               value={`${point.cloudCover}%`}
               color={chartColors.cloud}
-              icon={
-                <Cloud size={18} color={chartColors.cloud} strokeWidth={2.25} />
-              }
+              icon={<Cloud size={18} color={chartColors.cloud} strokeWidth={2.25} />}
             />
           )}
         </Stack>
@@ -411,12 +302,7 @@ export const WarningsPanel = ({ warnings }: WarningsPanelProps) => (
       {warnings.length ? (
         <Stack spacing={1}>
           {warnings.map((warning) => (
-            <Stack
-              key={warning.id}
-              direction="row"
-              spacing={1.5}
-              alignItems="flex-start"
-            >
+            <Stack key={warning.id} direction="row" spacing={1.5} alignItems="flex-start">
               <Box
                 sx={{
                   width: 32,
@@ -428,11 +314,7 @@ export const WarningsPanel = ({ warnings }: WarningsPanelProps) => (
                 }}
               >
                 {warning.alert === "rain" ? (
-                  <CloudRain
-                    size={32}
-                    color={chartColors.precipProbability}
-                    strokeWidth={2.25}
-                  />
+                  <CloudRain size={32} color={chartColors.precipProbability} strokeWidth={2.25} />
                 ) : (
                   <Wind size={32} color={chartColors.wind} strokeWidth={2.25} />
                 )}
@@ -470,14 +352,7 @@ export const BluebirdPanel = ({ windows }: BluebirdPanelProps) => (
       {windows.length ? (
         <Stack direction="row" flexWrap="wrap" gap={1}>
           {windows.map((window) => (
-            <Chip
-              key={window.key}
-              label={window.label}
-              color="primary"
-              variant="outlined"
-              size="small"
-              sx={{ color: "#dbeafe" }}
-            />
+            <Chip key={window.key} label={window.label} color="primary" variant="outlined" size="small" sx={{ color: "#dbeafe" }} />
           ))}
         </Stack>
       ) : (
@@ -494,14 +369,7 @@ type ChartLegendProps = {
 };
 
 const ChartLegend = ({ items }: ChartLegendProps) => (
-  <Stack
-    direction="row"
-    spacing={3}
-    flexWrap="wrap"
-    justifyContent="center"
-    alignItems="center"
-    sx={{ width: { xs: "100%", md: "auto" } }}
-  >
+  <Stack direction="row" spacing={3} flexWrap="wrap" justifyContent="center" alignItems="center" sx={{ width: { xs: "100%", md: "auto" } }}>
     {items.map((series) => (
       <Stack key={series.id} direction="row" spacing={0.75} alignItems="center">
         <Box sx={{ width: 10, height: 10, backgroundColor: series.color }} />
@@ -579,12 +447,7 @@ const ChartSurface = ({
         },
       }}
     >
-      <ResponsiveContainer
-        width="100%"
-        height={chartHeight}
-        minHeight={chartHeight}
-        minWidth={750}
-      >
+      <ResponsiveContainer width="100%" height={chartHeight} minHeight={chartHeight} minWidth={750}>
         <ComposedChart
           data={chartData}
           margin={chartMargin}
@@ -597,18 +460,13 @@ const ChartSurface = ({
               activeLabel?: string;
               activePayload?: Array<{ payload?: ChartPoint }>;
             } | null;
-            const index =
-              payload && typeof payload.activeTooltipIndex === "number"
-                ? payload.activeTooltipIndex
-                : null;
+            const index = payload && typeof payload.activeTooltipIndex === "number" ? payload.activeTooltipIndex : null;
             if (index != null) {
               onSelectPoint(index);
               return;
             }
             if (payload?.activeLabel) {
-              const labelIndex = chartData.findIndex(
-                (point) => point.time === payload.activeLabel,
-              );
+              const labelIndex = chartData.findIndex((point) => point.time === payload.activeLabel);
               if (labelIndex >= 0) {
                 onSelectPoint(labelIndex);
                 return;
@@ -617,24 +475,16 @@ const ChartSurface = ({
             const payloadPoint = payload?.activePayload?.[0]?.payload;
             if (!payloadPoint) return;
             const matchIndex = chartData.findIndex(
-              (point) =>
-                point.time === payloadPoint.time &&
-                point.startTime === payloadPoint.startTime,
+              (point) => point.time === payloadPoint.time && point.startTime === payloadPoint.startTime,
             );
             if (matchIndex >= 0) onSelectPoint(matchIndex);
           }}
         >
-          <CartesianGrid
-            vertical={false}
-            stroke="rgba(203, 213, 245, 0.18)"
-            strokeDasharray="4 6"
-          />
+          <CartesianGrid vertical={false} stroke="rgba(203, 213, 245, 0.18)" strokeDasharray="4 6" />
           <XAxis
             dataKey="time"
             ticks={xAxisTicks}
-            tickFormatter={(value) =>
-              dayFormatter.format(new Date(String(value)))
-            }
+            tickFormatter={(value) => dayFormatter.format(new Date(String(value)))}
             tick={{
               fill: "#d7e3ff",
               fontSize: isMobile ? 10 : 12,
@@ -644,18 +494,11 @@ const ChartSurface = ({
             axisLine={{ stroke: "rgba(203, 213, 245, 0.35)" }}
             tickLine={{ stroke: "rgba(203, 213, 245, 0.35)" }}
           />
-          <YAxis
-            yAxisId="snow"
-            hide
-            domain={[0, "auto"]}
-            padding={{ top: 20 }}
-          />
+          <YAxis yAxisId="snow" hide domain={[0, "auto"]} padding={{ top: 20 }} />
           <YAxis yAxisId="weather" hide domain={[0, 100]} />
           {!isMobile && (
             <Tooltip<number, string>
-              content={(props) => (
-                <ForecastTooltip {...props} points={chartData} />
-              )}
+              content={(props) => <ForecastTooltip {...props} points={chartData} />}
               cursor={{ stroke: "rgba(219, 231, 255, 0.25)" }}
               filterNull={false}
               shared
@@ -681,13 +524,7 @@ const ChartSurface = ({
               dot={false}
             />
           ))}
-          <Bar
-            yAxisId="snow"
-            dataKey="inches"
-            name="Snow (in)"
-            fill={chartColors.snow}
-            barSize={22}
-          >
+          <Bar yAxisId="snow" dataKey="inches" name="Snow (in)" fill={chartColors.snow} barSize={22}>
             <LabelList dataKey="inches" content={renderSnowLabel} />
           </Bar>
         </ComposedChart>
@@ -722,17 +559,8 @@ export const ChartPanel = ({
   onSelectPoint,
 }: ChartPanelProps) => (
   <Paper elevation={0} sx={chartPanelSx}>
-    <Stack
-      direction={{ xs: "column", md: "row" }}
-      justifyContent="space-between"
-      alignItems="center"
-      spacing={2}
-    >
-      {isMobile ? (
-        <MobileLegend point={activePoint} />
-      ) : (
-        <ChartLegend items={legendItems} />
-      )}
+    <Stack direction={{ xs: "column", md: "row" }} justifyContent="space-between" alignItems="center" spacing={2}>
+      {isMobile ? <MobileLegend point={activePoint} /> : <ChartLegend items={legendItems} />}
     </Stack>
 
     <ChartSurface

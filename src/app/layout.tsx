@@ -9,11 +9,7 @@ export const metadata: Metadata = {
   description: "Find the best snow days",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={inter.variable}>
       <body className={inter.className}>

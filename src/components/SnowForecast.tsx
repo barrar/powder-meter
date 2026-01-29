@@ -8,13 +8,9 @@ type SnowForecastProps = {
   timeZoneId: TimeZoneId;
 };
 
-const loadSnowForecast = async (locationId?: ForecastLocationId) =>
-  getWeatherData(locationId);
+const loadSnowForecast = async (locationId?: ForecastLocationId) => getWeatherData(locationId);
 
-export default async function SnowForecast({
-  locationId,
-  timeZoneId,
-}: SnowForecastProps) {
+export default async function SnowForecast({ locationId, timeZoneId }: SnowForecastProps) {
   const data = await loadSnowForecast(locationId);
 
   return <CustomChartClient data={data} timeZone={timeZoneId} />;

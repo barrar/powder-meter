@@ -1,21 +1,9 @@
 import LocationMenu from "@/components/LocationMenu";
 import SnowForecast from "@/components/SnowForecast";
 import { surfaceGradient } from "@/data/chartStyles";
-import {
-  forecastLocations,
-  forecastStates,
-  getForecastLocation,
-  getForecastLocationsForState,
-} from "@/data/forecastLocations";
+import { forecastLocations, forecastStates, getForecastLocation, getForecastLocationsForState } from "@/data/forecastLocations";
 import { resolveTimeZoneId, timeZoneOptions } from "@/data/timeZones";
-import {
-  Box,
-  Button,
-  Container,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
 import { Suspense } from "react";
 
 type SearchParams = {
@@ -27,8 +15,7 @@ type PageProps = {
   searchParams?: SearchParams | Promise<SearchParams>;
 };
 
-const resolveParam = (value?: string | string[]) =>
-  Array.isArray(value) ? value[0] : value;
+const resolveParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
 
 const resolveForecastSelection = (searchParams?: SearchParams) => {
   const locationParam = resolveParam(searchParams?.location);
@@ -36,10 +23,7 @@ const resolveForecastSelection = (searchParams?: SearchParams) => {
   const locationFromParam = getForecastLocation(locationParam);
   const resolvedState = locationFromParam.state;
   const stateLocations = getForecastLocationsForState(resolvedState);
-  const location =
-    stateLocations.find((item) => item.id === locationFromParam.id) ??
-    stateLocations[0] ??
-    locationFromParam;
+  const location = stateLocations.find((item) => item.id === locationFromParam.id) ?? stateLocations[0] ?? locationFromParam;
 
   return {
     locationId: location.id,
@@ -57,8 +41,7 @@ const resolveForecastSelection = (searchParams?: SearchParams) => {
 
 export default async function Page({ searchParams }: PageProps) {
   const resolvedSearchParams = await Promise.resolve(searchParams);
-  const { locationId, timeZoneValue, menu } =
-    resolveForecastSelection(resolvedSearchParams);
+  const { locationId, timeZoneValue, menu } = resolveForecastSelection(resolvedSearchParams);
 
   return (
     <Box sx={{ minHeight: "100vh", px: { xs: 0, md: 1 }, py: 3 }}>
@@ -77,17 +60,13 @@ export default async function Page({ searchParams }: PageProps) {
                 <Typography variant="h3" component="h1">
                   Powder Meter
                 </Typography>
-                <Typography variant="body1">
-                  A quick, visual snow centric forcast
-                </Typography>
+                <Typography variant="body1">A quick, visual snow centric forcast</Typography>
               </Stack>
               <LocationMenu {...menu} />
             </Stack>
           </Paper>
 
-          <Suspense
-            fallback={<Typography variant="h4">Loading forecast...</Typography>}
-          >
+          <Suspense fallback={<Typography variant="h4">Loading forecast...</Typography>}>
             <SnowForecast locationId={locationId} timeZoneId={timeZoneValue} />
           </Suspense>
 
@@ -99,11 +78,7 @@ export default async function Page({ searchParams }: PageProps) {
               borderTop: "1px solid rgba(226, 232, 255, 0.2)",
             }}
           >
-            <Stack
-              direction={{ xs: "column", sm: "row" }}
-              justifyContent="space-between"
-              spacing={2}
-            >
+            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2}>
               <Typography variant="body2" color="text.secondary">
                 {`\u00a9 ${new Date().getFullYear()} Jeremiah Barrar`}
               </Typography>

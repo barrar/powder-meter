@@ -11,11 +11,7 @@ import {
   legendItems,
   lineSeries,
 } from "@/components/customChartData";
-import {
-  BluebirdPanel,
-  ChartPanel,
-  WarningsPanel,
-} from "@/components/CustomChartPanels";
+import { BluebirdPanel, ChartPanel, WarningsPanel } from "@/components/CustomChartPanels";
 import type { ForecastPoint } from "@/data/getWeatherData";
 import type { TimeZoneId } from "@/data/timeZones";
 import { Grid, Stack, useMediaQuery } from "@mui/material";
@@ -27,25 +23,18 @@ type CustomChartClientProps = {
   timeZone: TimeZoneId;
 };
 
-export default function CustomChartClient({
-  data,
-  timeZone,
-}: CustomChartClientProps) {
+export default function CustomChartClient({ data, timeZone }: CustomChartClientProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const formatters = createTimeFormatters(timeZone);
   const chartData = buildChartData(data, formatters);
-  const warningDetails = buildWarningDetails(
-    buildWarnings(chartData),
-    chartData,
-  );
+  const warningDetails = buildWarningDetails(buildWarnings(chartData), chartData);
   const bluebirdWindows = buildBluebirdWindows(chartData);
   const xAxisTicks = buildXAxisTicks(chartData);
   const { chartHeight, chartMargin } = buildChartLayout(isMobile);
-  const resolvedIndex =
-    activeIndex != null && chartData[activeIndex] ? activeIndex : null;
+  const resolvedIndex = activeIndex != null && chartData[activeIndex] ? activeIndex : null;
   const activePoint = resolvedIndex != null ? chartData[resolvedIndex] : null;
 
   return (
