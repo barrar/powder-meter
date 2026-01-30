@@ -1,10 +1,12 @@
 "use server";
 import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration";
 import utc from "dayjs/plugin/utc";
 import { createClient } from "redis";
 import { getForecastLocation, type ForecastLocationId } from "./forecastLocations";
 
 dayjs.extend(utc);
+dayjs.extend(duration);
 
 const CACHE_TTL_SECONDS = 4 * 60 * 60; // 4 hours
 
@@ -78,6 +80,7 @@ type NOAAValue = { validTime: string; value: number | string | null };
 export type ForecastPoint = {
   time: string;
   startTime: string;
+  endTime: string;
   inches: number | null;
   precipInches: number | null;
   precipProbability: number | null;
@@ -111,7 +114,17 @@ const mmToInches = (millimeters: number | string | null | undefined) => {
   return Math.round(numeric * 0.0393701 * 100) / 100;
 };
 
-const validStart = (validTime: string) => validTime.replace(/\/.*$/, "");
+const parseInterval = (validTime: string) => {
+  const [start, endOrDuration] = validTime.split("/");
+  if (!endOrDuration) return { start, end: start };
+  if (endOrDuration.startsWith("P")) {
+    const end = dayjs.utc(start).add(dayjs.duration(endOrDuration)).toISOString();
+    return { start, end };
+  }
+  return { start, end: endOrDuration };
+};
+
+const intervalStart = (validTime: string) => parseInterval(validTime).start;
 const cToF = (celsius: number | null) => (celsius == null ? null : Math.round(((celsius * 9) / 5 + 32) * 10) / 10);
 const kmhToMph = (kmh: number | null) => (kmh == null ? null : Math.round(kmh * 0.621371 * 10) / 10);
 const fillNearest = (times: string[], values: Array<number | null>) => {
@@ -157,6 +170,7 @@ const fillNearest = (times: string[], values: Array<number | null>) => {
 };
 
 export async function getWeatherData(locationId?: ForecastLocationId): Promise<ForecastPoint[]> {
+  const nowUtc = dayjs.utc();
   const location = getForecastLocation(locationId);
   const cacheKey = buildCacheKey(location);
   const cachedData = await readCachedGridData(cacheKey);
@@ -189,23 +203,31 @@ export async function getWeatherData(locationId?: ForecastLocationId): Promise<F
   const skyCover = (data.properties.skyCover?.values ?? []) as NOAAValue[];
 
   const baseSeries = snowfall.length ? snowfall : temperature.length ? temperature : precipProbability;
-  const baseTimes = baseSeries.map((entry) => validStart(entry.validTime));
+  const baseTimes = baseSeries.map((entry) => intervalStart(entry.validTime));
 
-  const snowByStart = new Map<string, number | null>(snowfall.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]));
+  const snowByStart = new Map<string, number | null>(snowfall.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]));
   const precipByStart = new Map<string, number | null>(
-    quantitativePrecip.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]),
+    quantitativePrecip.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]),
   );
   const probByStart = new Map<string, number | null>(
-    precipProbability.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]),
+    precipProbability.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]),
   );
-  const tempByStart = new Map<string, number | null>(temperature.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]));
-  const windByStart = new Map<string, number | null>(windSpeed.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]));
-  const windGustByStart = new Map<string, number | null>(windGust.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]));
-  const cloudByStart = new Map<string, number | null>(skyCover.map((entry) => [validStart(entry.validTime), parseNumber(entry.value)]));
+  const tempByStart = new Map<string, number | null>(
+    temperature.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]),
+  );
+  const windByStart = new Map<string, number | null>(windSpeed.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]));
+  const windGustByStart = new Map<string, number | null>(
+    windGust.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]),
+  );
+  const cloudByStart = new Map<string, number | null>(skyCover.map((entry) => [intervalStart(entry.validTime), parseNumber(entry.value)]));
 
   const tempValues = fillNearest(
     baseTimes,
     baseTimes.map((start) => tempByStart.get(start) ?? null),
+  );
+  const probValues = fillNearest(
+    baseTimes,
+    baseTimes.map((start) => probByStart.get(start) ?? null),
   );
   const windValues = fillNearest(
     baseTimes,
@@ -222,10 +244,10 @@ export async function getWeatherData(locationId?: ForecastLocationId): Promise<F
 
   return baseSeries
     .map((entry, idx) => {
-      const start = validStart(entry.validTime);
+      const { start, end } = parseInterval(entry.validTime);
       const snowInches = mmToInches(snowByStart.get(start));
       const precipInches = mmToInches(precipByStart.get(start));
-      const probability = probByStart.get(start) ?? null;
+      const probability = probValues[idx] ?? null;
       const temperatureF = cToF(tempValues[idx] ?? null);
       const windMph = kmhToMph(windValues[idx] ?? null);
       const windGustMph = kmhToMph(windGustValues[idx] ?? null);
@@ -244,6 +266,7 @@ export async function getWeatherData(locationId?: ForecastLocationId): Promise<F
       return {
         time: dayjs.utc(start).toISOString(),
         startTime: start,
+        endTime: end,
         inches: snowInches !== 0 ? snowInches : null,
         precipInches: precipInches !== 0 ? precipInches : null,
         precipProbability: probability,
@@ -257,5 +280,6 @@ export async function getWeatherData(locationId?: ForecastLocationId): Promise<F
         alert,
       };
     })
+    .filter((point) => dayjs.utc(point.endTime).isAfter(nowUtc))
     .slice(0, 22);
 }

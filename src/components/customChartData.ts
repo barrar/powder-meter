@@ -18,6 +18,7 @@ export type ChartPoint = ForecastPoint & {
   dayLabel: string;
   endTimeLabel: string;
   endTimeMs: number;
+  snowChart: number;
   precipProbabilityChart: number | null;
   showRainRisk: boolean;
   showWindRisk: boolean;
@@ -103,11 +104,6 @@ export const lineSeries: LineSeries[] = [
 export const legendItems: LegendItem[] = [
   { id: "snowfall", label: "Snow (in)", color: chartColors.snow },
   ...lineSeries.map(({ id, label, color }) => ({ id, label, color })),
-  {
-    id: "precip-prob",
-    label: "Rain chance (%)",
-    color: chartColors.precipProbability,
-  },
 ];
 
 const formatMph = (value: number | null) => {
@@ -178,12 +174,18 @@ export const buildChartData = (data: ForecastPoint[], formatters: TimeFormatters
     const nextDate = nextTimeMs ? new Date(nextTimeMs) : null;
     const { timeLabel, dateLabel, rangeLabel, dayLabel, endTimeLabel } = buildTimeLabels(currentDate, nextDate, formatters);
 
-    const hasMeaningfulPrecip = (point.precipInches ?? 0) > rainPrecipThreshold;
     const isRain = point.precipitationType === "rain";
     const probabilityValue = point.precipProbability ?? null;
-    const hasRainProbability = probabilityValue == null ? rainWarningThreshold <= 0 : probabilityValue >= rainWarningThreshold;
+    const rainAmount = point.precipInches ?? 0;
+    const rainChance = probabilityValue ?? 0;
+    const suppressRain = isRain && (rainChance < 20 || rainAmount <= 0.02);
+    const adjustedPrecipInches = suppressRain ? 0 : rainAmount;
+    const adjustedProbability = suppressRain ? 0 : probabilityValue;
+    const adjustedPrecipType = suppressRain ? "none" : point.precipitationType;
+    const hasMeaningfulPrecip = adjustedPrecipInches > rainPrecipThreshold;
+    const hasRainProbability = adjustedProbability == null ? rainWarningThreshold <= 0 : adjustedProbability >= rainWarningThreshold;
     const showRainRisk = isRain && hasMeaningfulPrecip && hasRainProbability;
-    const chartProbability = showRainRisk ? probabilityValue : null;
+    const chartProbability = showRainRisk ? adjustedProbability : null;
     const peakWindMph = point.windGustMph ?? point.windMph;
     const showWindRisk = peakWindMph != null && peakWindMph > windWarningThreshold;
 
@@ -196,8 +198,11 @@ export const buildChartData = (data: ForecastPoint[], formatters: TimeFormatters
       dayLabel,
       endTimeLabel,
       endTimeMs: nextTimeMs ?? currentTimeMs,
-      precipProbability: probabilityValue,
+      snowChart: point.inches ?? 0,
+      precipInches: adjustedPrecipInches || null,
+      precipProbability: adjustedProbability,
       precipProbabilityChart: chartProbability,
+      precipitationType: adjustedPrecipType,
       showRainRisk,
       showWindRisk,
     };
@@ -311,48 +316,53 @@ const getWindSummary = (warning: WarningRange, chartData: ChartPoint[]): WindSum
 };
 
 export const buildWarningDetails = (warnings: WarningRange[], chartData: ChartPoint[]): WarningDetail[] =>
-  warnings.map((warning) => {
+  warnings.flatMap((warning) => {
     const rangeLabel = `${warning.startLabel} - ${warning.endLabel}`;
     if (warning.alert === "rain") {
       const summary = getRainSummary(warning, chartData);
-      const summaryText = summary
-        ? `Average chance ${formatPercent(summary.averageChance)}, total precipitation ${formatInches(summary.totalPrecip)}`
-        : `Avg chance ${missingValue} ${summarySeparator} Total ${missingValue}`;
-      return {
-        id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
-        alert: warning.alert,
-        rangeLabel,
-        summaryText,
-      };
+      if (!summary || summary.totalPrecip < 0.04) return [];
+      const summaryText = `Average rain chance ${formatPercent(summary.averageChance)}, total rain ${formatInches(summary.totalPrecip)}`;
+      return [
+        {
+          id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
+          alert: warning.alert,
+          rangeLabel,
+          summaryText,
+        },
+      ];
     }
     const summary = getWindSummary(warning, chartData);
     const summaryText = summary
       ? `Average ${formatMph(summary.averageWind)}, peak ${summary.peakWind != null ? formatMph(summary.peakWind) : "unavailable"}`
       : "";
-    return {
-      id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
-      alert: warning.alert,
-      rangeLabel,
-      summaryText,
-    };
+    return [
+      {
+        id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
+        alert: warning.alert,
+        rangeLabel,
+        summaryText,
+      },
+    ];
   });
 
 export const buildBluebirdWindows = (chartData: ChartPoint[]): BluebirdWindow[] =>
   chartData.filter((point) => point.isBluebird).map((point) => ({ key: point.startTime, label: point.timeLabel }));
 
 export const buildXAxisTicks = (chartData: ChartPoint[]) =>
-  chartData.reduce<string[]>((acc, point, idx) => {
-    const previous = chartData[idx - 1];
-    if (!previous || previous.dayLabel !== point.dayLabel) {
-      acc.push(point.time);
-    }
-    return acc;
-  }, []);
+  chartData
+    .reduce<string[]>((acc, point, idx) => {
+      const previous = chartData[idx - 1];
+      if (!previous || previous.dayLabel !== point.dayLabel) {
+        acc.push(point.time);
+      }
+      return acc;
+    }, [])
+    .slice(1);
 
 export const buildChartLayout = (isMobile: boolean): ChartLayout => {
   const chartHeight = isMobile ? 360 : 520;
   const chartMargin = {
-    top: 24,
+    top: isMobile ? 32 : 40,
     right: isMobile ? 18 : 36,
     bottom: isMobile ? 28 : 32,
     left: isMobile ? 16 : 26,

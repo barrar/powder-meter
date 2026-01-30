@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import {
   Bar,
   CartesianGrid,
+  Cell,
   ComposedChart,
   LabelList,
   Line,
@@ -53,7 +54,7 @@ const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
         height={rectHeight}
         rx={6}
         ry={6}
-        fill="rgb(18, 31, 62)"
+        fill="rgba(18, 31, 62, 1)"
         stroke="rgba(255, 255, 255, .2)"
         strokeWidth={1}
       />
@@ -62,7 +63,7 @@ const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
         y={rectY + rectHeight / 2 + 1}
         textAnchor="middle"
         dominantBaseline="middle"
-        fill="#e5edff"
+        fill="rgba(229, 237, 255, 1)"
         fontSize={12}
         fontWeight={700}
       >
@@ -72,11 +73,35 @@ const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
   );
 };
 
+const resolveSnowBarColor = (point: ChartPoint) => {
+  const chance = point.precipProbability;
+  if (chance != null && Number.isFinite(chance)) {
+    if (chance >= 70) return chartColors.snowHighChance;
+    if (chance >= 50) return chartColors.snow;
+  }
+  return chartColors.snowLowChance;
+};
+
+const hasSnowAmount = (point: ChartPoint | null) => (point?.inches ?? 0) > 0;
+const resolvePrecipLabel = (point: ChartPoint | null) => (point?.precipitationType === "rain" ? "Rain" : "Precipitation");
+const resolveChanceLabel = (point: ChartPoint | null) => {
+  if (hasSnowAmount(point)) return "Snow chance";
+  return point?.precipitationType === "rain" ? "Rain chance" : "Precip chance";
+};
+
 type MetricRowProps = {
   label: string;
   value: ReactNode;
   color: string;
   icon?: ReactNode;
+};
+
+type MetricItem = {
+  key: string;
+  label: string;
+  value: ReactNode;
+  color: string;
+  icon: ReactNode;
 };
 
 const MetricRow = ({ label, value, color, icon }: MetricRowProps) => (
@@ -115,6 +140,54 @@ const MetricRow = ({ label, value, color, icon }: MetricRowProps) => (
   </Stack>
 );
 
+const buildPrecipMetrics = (point: ChartPoint | null, placeholder: string): MetricItem[] => {
+  const hasSnow = hasSnowAmount(point);
+  const metrics: MetricItem[] = [];
+  const showSnowAmount = point && point.inches != null && point.inches !== 0;
+  const showPrecipAmount = !hasSnow && (point?.precipInches ?? 0) > 0;
+  const hasAmount = showSnowAmount || showPrecipAmount;
+
+  if (showSnowAmount) {
+    metrics.push({
+      key: "snow",
+      label: "Snow",
+      value: `${point.inches}"`,
+      color: chartColors.snowHighChance,
+      icon: <Snowflake size={18} color={chartColors.snowHighChance} strokeWidth={2.25} />,
+    });
+  }
+
+  if (showPrecipAmount) {
+    metrics.push({
+      key: "precip",
+      label: resolvePrecipLabel(point),
+      value: point ? `${point.precipInches ?? 0}"` : placeholder,
+      color: chartColors.precipProbability,
+      icon: <CloudRain size={18} color={chartColors.precipProbability} strokeWidth={2.25} />,
+    });
+  }
+
+  if (hasAmount) {
+    const chanceLabel = point ? resolveChanceLabel(point) : "Snow chance";
+    const chanceColor = hasSnow ? chartColors.snowHighChance : chartColors.rain;
+    const chanceValue = point ? `${point.precipProbability ?? 0}%` : placeholder;
+
+    metrics.push({
+      key: "chance",
+      label: chanceLabel,
+      value: chanceValue,
+      color: chanceColor,
+      icon: hasSnow ? (
+        <Snowflake size={18} color={chanceColor} strokeWidth={2.25} />
+      ) : (
+        <Droplets size={18} color={chanceColor} strokeWidth={2.25} />
+      ),
+    });
+  }
+
+  return metrics;
+};
+
 type MobileLegendProps = {
   point: ChartPoint | null;
 };
@@ -122,6 +195,7 @@ type MobileLegendProps = {
 const MobileLegend = ({ point }: MobileLegendProps) => {
   const placeholder = "-";
   const titleText = point ? point.rangeLabel : "Select an area of the chart to view details.";
+  const precipMetrics = buildPrecipMetrics(point, placeholder);
 
   return (
     <Stack spacing={1}>
@@ -141,27 +215,7 @@ const MobileLegend = ({ point }: MobileLegendProps) => {
         }}
       >
         {[
-          {
-            key: "snow",
-            label: "Snow",
-            value: point ? `${point.inches ?? 0}"` : placeholder,
-            color: chartColors.snow,
-            icon: <Snowflake size={18} color={chartColors.snow} strokeWidth={2.25} />,
-          },
-          {
-            key: "precip",
-            label: "Precipitation",
-            value: point ? `${point.precipInches ?? 0}"` : placeholder,
-            color: chartColors.precipProbability,
-            icon: <CloudRain size={18} color={chartColors.precipProbability} strokeWidth={2.25} />,
-          },
-          {
-            key: "chance",
-            label: "Rain chance",
-            value: point ? `${point.precipProbability ?? 0}%` : placeholder,
-            color: chartColors.precipProbability,
-            icon: <Droplets size={18} color={chartColors.precipProbability} strokeWidth={2.25} />,
-          },
+          ...precipMetrics,
           {
             key: "temp",
             label: "Temperature",
@@ -219,6 +273,7 @@ const ForecastTooltip = ({ active, payload, activeIndex, points }: ForecastToolt
   const fallbackPoint = typeof activeIndex === "number" ? points[activeIndex] : undefined;
   const point = payloadPoint ?? fallbackPoint;
   if (!point) return null;
+  const precipMetrics = buildPrecipMetrics(point, "-");
   return (
     <Paper
       elevation={0}
@@ -241,24 +296,9 @@ const ForecastTooltip = ({ active, payload, activeIndex, points }: ForecastToolt
         </Stack>
         <Divider sx={{ borderColor: "rgba(255,255,255,0.12)" }} />
         <Stack spacing={0.75}>
-          <MetricRow
-            label="Snow"
-            value={`${point.inches ?? 0}"`}
-            color={chartColors.snow}
-            icon={<Snowflake size={18} color={chartColors.snow} strokeWidth={2.25} />}
-          />
-          <MetricRow
-            label="Precipitation"
-            value={`${point.precipInches ?? 0}"`}
-            color={chartColors.precipProbability}
-            icon={<CloudRain size={18} color={chartColors.precipProbability} strokeWidth={2.25} />}
-          />
-          <MetricRow
-            label="Rain chance"
-            value={`${point.precipProbability ?? 0}%`}
-            color={chartColors.precipProbability}
-            icon={<Droplets size={18} color={chartColors.precipProbability} strokeWidth={2.25} />}
-          />
+          {precipMetrics.map((metric) => (
+            <MetricRow key={metric.key} label={metric.label} value={metric.value} color={metric.color} icon={metric.icon} />
+          ))}
           {point.temperatureF != null && (
             <MetricRow
               label="Temperature"
@@ -352,7 +392,14 @@ export const BluebirdPanel = ({ windows }: BluebirdPanelProps) => (
       {windows.length ? (
         <Stack direction="row" flexWrap="wrap" gap={1}>
           {windows.map((window) => (
-            <Chip key={window.key} label={window.label} color="primary" variant="outlined" size="small" sx={{ color: "#dbeafe" }} />
+            <Chip
+              key={window.key}
+              label={window.label}
+              color="primary"
+              variant="outlined"
+              size="small"
+              sx={{ color: "rgba(219, 234, 254, 1)" }}
+            />
           ))}
         </Stack>
       ) : (
@@ -486,7 +533,7 @@ const ChartSurface = ({
             ticks={xAxisTicks}
             tickFormatter={(value) => dayFormatter.format(new Date(String(value)))}
             tick={{
-              fill: "#d7e3ff",
+              fill: "rgba(215, 227, 255, 1)",
               fontSize: isMobile ? 10 : 12,
               fontWeight: 600,
             }}
@@ -505,13 +552,11 @@ const ChartSurface = ({
               wrapperStyle={{ outline: "none" }}
             />
           )}
-          <Bar
-            yAxisId="weather"
-            dataKey="precipProbabilityChart"
-            name="Rain chance (%)"
-            fill={chartColors.precipProbability}
-            barSize={10}
-          />
+          <Bar yAxisId="weather" dataKey="precipProbabilityChart" name="Precip chance (%)" fill={chartColors.rain} barSize={22}>
+            {chartData.map((point) => (
+              <Cell key={`rain-${point.time}`} fill={chartColors.rain} />
+            ))}
+          </Bar>
           {lineSeries.map((series) => (
             <Line
               key={series.id}
@@ -524,8 +569,11 @@ const ChartSurface = ({
               dot={false}
             />
           ))}
-          <Bar yAxisId="snow" dataKey="inches" name="Snow (in)" fill={chartColors.snow} barSize={22}>
-            <LabelList dataKey="inches" content={renderSnowLabel} />
+          <Bar yAxisId="snow" dataKey="snowChart" name="Snow (in)" fill={chartColors.snow} barSize={22}>
+            {chartData.map((point) => (
+              <Cell key={point.time} fill={resolveSnowBarColor(point)} />
+            ))}
+            <LabelList dataKey="snowChart" content={renderSnowLabel} />
           </Bar>
         </ComposedChart>
       </ResponsiveContainer>
