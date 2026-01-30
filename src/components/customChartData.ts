@@ -327,6 +327,13 @@ const getWindSummary = (warning: WarningRange, chartData: ChartPoint[]): WindSum
   return { averageWind, peakWind };
 };
 
+const buildWarningDetail = (warning: WarningRange, rangeLabel: string, summaryText: string): WarningDetail => ({
+  id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
+  alert: warning.alert,
+  rangeLabel,
+  summaryText,
+});
+
 export const buildWarningDetails = (warnings: WarningRange[], chartData: ChartPoint[]): WarningDetail[] =>
   warnings.flatMap((warning) => {
     const rangeLabel = `${warning.startLabel} - ${warning.endLabel}`;
@@ -334,27 +341,13 @@ export const buildWarningDetails = (warnings: WarningRange[], chartData: ChartPo
       const summary = getRainSummary(warning, chartData);
       if (!summary || summary.totalPrecip < 0.04) return [];
       const summaryText = `Average rain chance ${formatPercent(summary.averageChance)}, total rain ${formatInches(summary.totalPrecip)}`;
-      return [
-        {
-          id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
-          alert: warning.alert,
-          rangeLabel,
-          summaryText,
-        },
-      ];
+      return [buildWarningDetail(warning, rangeLabel, summaryText)];
     }
     const summary = getWindSummary(warning, chartData);
     const summaryText = summary
       ? `Average ${formatMph(summary.averageWind)}, peak ${summary.peakWind != null ? formatMph(summary.peakWind) : "unavailable"}`
       : "";
-    return [
-      {
-        id: `${warning.alert}-${warning.startIndex}-${warning.endIndex}`,
-        alert: warning.alert,
-        rangeLabel,
-        summaryText,
-      },
-    ];
+    return [buildWarningDetail(warning, rangeLabel, summaryText)];
   });
 
 export const buildBluebirdWindows = (chartData: ChartPoint[]): BluebirdWindow[] =>
