@@ -26,16 +26,18 @@ Live demo: https://powdermeter.com
 
 - `src/app/layout.tsx` — global layout, theme wiring, and global styles
 - `src/app/page.tsx` — landing page shell + suspense boundary for the forecast
+- `src/app/_lib/forecastSelection.ts` — search-param parsing and forecast menu selection
 - `src/components/SnowForecast.tsx` — server component that loads NOAA data and streams the client chart
-- `src/components/CustomChart.tsx` — client chart UI (warnings, bands, tooltip, chart config)
-- `src/components/LocationMenu.tsx` — state and resort selectors
-- `src/data/getWeatherData.tsx` — server-side fetch + normalization of NOAA forecast data
+- `src/components/chart/CustomChartClient.tsx` — client chart container and panel composition
+- `src/components/chart/CustomChartPanels.tsx` — chart panels and rendering surface
+- `src/components/location/LocationMenu.tsx` — state and resort selectors
+- `src/data/getWeatherData.ts` — server-side fetch + normalization of NOAA forecast data
 - `src/data/forecastLocations.ts` — resort gridpoints grouped by state
 - `src/data/timeZones.ts` — supported resort time zones
 
 ## Data Source & Caching
 
-The forecast is fetched from the NOAA Weather.gov gridpoint endpoint configured in `src/data/getWeatherData.tsx`.
+The forecast is fetched from the NOAA Weather.gov gridpoint endpoint configured in `src/data/getWeatherData.ts`.
 
 - Locations are defined in `src/data/forecastLocations.ts` as `{ office, x, y }` gridpoints.
 - Weather.gov requests require a descriptive `User-Agent`; this project sets one in the request headers.

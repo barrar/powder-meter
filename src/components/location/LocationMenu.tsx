@@ -2,7 +2,8 @@
 
 import { FormControl, InputLabel, MenuItem, Select, Stack, type SelectChangeEvent } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { ForecastLocation, ForecastState, ForecastStateOption } from "../data/forecastLocations";
+import type { ForecastLocation, ForecastState, ForecastStateOption } from "@/data/forecastLocations";
+import { buildLocationRoute, buildStateRoute } from "@/components/location/locationQueryParams";
 
 export type LocationMenuProps = {
   locations: ForecastLocation[];
@@ -19,27 +20,15 @@ export default function LocationMenu({ locations, states, stateValue, value }: L
     stateLocations.find((location) => location.id === value)?.id ?? stateLocations[0]?.id ?? value;
 
   const handleLocationChange = (event: SelectChangeEvent) => {
-    const nextLocation = event.target.value;
-    const params = new URLSearchParams(searchParams?.toString());
-    params.set("location", String(nextLocation));
-    params.delete("timezone");
-    const query = params.toString();
-    router.push(query ? `/?${query}` : "/");
+    const nextRoute = buildLocationRoute(searchParams, String(event.target.value));
+    router.push(nextRoute);
     router.refresh();
   };
 
   const handleStateChange = (event: SelectChangeEvent) => {
     const nextState = event.target.value as ForecastState;
-    const params = new URLSearchParams(searchParams?.toString());
-    const nextLocation = locations.find((location) => location.state === nextState);
-    if (nextLocation) {
-      params.set("location", nextLocation.id);
-    } else {
-      params.delete("location");
-    }
-    params.delete("timezone");
-    const query = params.toString();
-    router.push(query ? `/?${query}` : "/");
+    const nextRoute = buildStateRoute(searchParams, nextState, locations);
+    router.push(nextRoute);
     router.refresh();
   };
 

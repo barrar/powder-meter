@@ -2,9 +2,10 @@
 
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { getForecastLocation, type ForecastLocation, type ForecastLocationId } from "./forecastLocations";
+import { getForecastLocation, type ForecastLocationId } from "./forecastLocations";
 import { buildCacheKey, readCachedGridData, writeCachedGridData } from "./weather/cache";
-import type { ForecastPoint, NOAAValue } from "./weather/forecastTypes";
+import { fetchGridpointData, type NOAAGridpointResponse } from "./weather/noaaApi";
+import type { ForecastPoint } from "./weather/forecastTypes";
 import {
   cToF,
   fillNearest,
@@ -17,39 +18,11 @@ import {
 
 dayjs.extend(utc);
 
-const NOAA_USER_AGENT = "(powdermeter.com, contact@powdermeter.com)";
-
-type NOAAResponse = {
-  properties?: {
-    snowfallAmount?: { values?: NOAAValue[] };
-    quantitativePrecipitation?: { values?: NOAAValue[] };
-    probabilityOfPrecipitation?: { values?: NOAAValue[] };
-    temperature?: { values?: NOAAValue[] };
-    windSpeed?: { values?: NOAAValue[] };
-    windGust?: { values?: NOAAValue[] };
-    skyCover?: { values?: NOAAValue[] };
-  };
-};
-
-const fetchGridpointData = async (location: ForecastLocation): Promise<NOAAResponse> => {
-  const url = `https://api.weather.gov/gridpoints/${location.gridpoints.office}/${location.gridpoints.x},${location.gridpoints.y}`;
-  const res = await fetch(url, {
-    headers: {
-      "user-agent": NOAA_USER_AGENT,
-    },
-    cache: "no-store",
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch NOAA gridpoint data (${res.status} ${res.statusText})`);
-  }
-  return (await res.json()) as NOAAResponse;
-};
-
 export async function getWeatherData(locationId?: ForecastLocationId): Promise<ForecastPoint[]> {
   const nowUtc = dayjs.utc();
   const location = getForecastLocation(locationId);
   const cacheKey = buildCacheKey(location);
-  const cachedData = await readCachedGridData<NOAAResponse>(cacheKey);
+  const cachedData = await readCachedGridData<NOAAGridpointResponse>(cacheKey);
   const data = cachedData ?? (await fetchGridpointData(location));
 
   if (!cachedData) {

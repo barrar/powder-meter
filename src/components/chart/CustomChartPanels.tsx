@@ -1,21 +1,13 @@
 "use client";
 
-import type { BluebirdWindow, ChartMargin, ChartPoint, LineSeries, WarningDetail } from "@/components/customChartData";
-import { chartColors, surfaceGradient } from "@/data/chartStyles";
 import { Box, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
-import { Cloud, CloudRain, Droplets, Snowflake, Thermometer, Wind } from "lucide-react";
-import type { ReactNode } from "react";
-import {
-  Bar,
-  Cell,
-  ComposedChart,
-  LabelList,
-  Line,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  type LabelProps,
-} from "recharts";
+import { Cloud, CloudRain, Thermometer, Wind } from "lucide-react";
+import { Bar, Cell, ComposedChart, LabelList, Line, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { resolveChartIndex, type ChartInteractionPayload } from "@/components/chart/chartInteraction";
+import { buildPrecipMetrics } from "@/components/chart/legendMetrics";
+import { renderSnowLabel, resolveSnowBarColor } from "@/components/chart/snowChartPresentation";
+import type { BluebirdWindow, ChartMargin, ChartPoint, LineSeries, WarningDetail } from "@/components/chart/customChartData";
+import { chartColors, surfaceGradient } from "@/data/chartStyles";
 
 const panelSx = {
   p: { xs: 2, md: 3 },
@@ -27,144 +19,6 @@ const chartPanelSx = {
   p: { xs: 2, md: 3 },
   background: surfaceGradient,
   boxShadow: "0 24px 60px rgba(6, 12, 28, 0.45)",
-};
-
-const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
-  if (value == null) return null;
-  const numeric = typeof value === "number" ? value : Number(value);
-  if (!Number.isFinite(numeric) || numeric === 0) return null;
-  if (typeof x !== "number" || typeof y !== "number" || typeof width !== "number") return null;
-
-  const labelText = String(numeric);
-  const rectHeight = 18;
-  const rectPadding = 8;
-  const rectWidth = labelText.length * 7 + rectPadding;
-  const rectX = x + width / 2 - rectWidth / 2;
-  const rectY = y - rectHeight - 4;
-
-  return (
-    <g>
-      <rect
-        x={rectX}
-        y={rectY}
-        width={rectWidth}
-        height={rectHeight}
-        rx={6}
-        ry={6}
-        fill="rgba(18, 31, 62, 1)"
-        stroke="rgba(255, 255, 255, .2)"
-        strokeWidth={1}
-      />
-      <text
-        x={x + width / 2}
-        y={rectY + rectHeight / 2 + 1}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fill="rgba(229, 237, 255, 1)"
-        fontSize={12}
-        fontWeight={700}
-      >
-        {labelText}
-      </text>
-    </g>
-  );
-};
-
-const resolveSnowBarColor = (point: ChartPoint) => {
-  const chance = point.precipProbability;
-  if (chance != null && Number.isFinite(chance)) {
-    if (chance >= 70) return chartColors.snowHighChance;
-    if (chance >= 40) return chartColors.snow;
-  }
-  return chartColors.snowLowChance;
-};
-
-type MetricItem = {
-  key: string;
-  label: string;
-  value: ReactNode;
-  color: string;
-  icon: ReactNode;
-};
-
-const buildPrecipMetrics = (point: ChartPoint | null, placeholder: string): MetricItem[] => {
-  const metrics: MetricItem[] = [];
-  const isRain = point?.precipitationType === "rain";
-  const snowAmount = point?.inches ?? 0;
-  const rainAmount = point?.precipInches ?? 0;
-  const hasSnow = snowAmount > 0;
-  const hasRain = rainAmount > 0;
-  const hasAmount = isRain ? hasRain : hasSnow;
-  const amountValue = isRain ? rainAmount : snowAmount;
-  const amountLabel = isRain ? "Rain" : "Snow";
-  const amountColor = isRain ? chartColors.rain : chartColors.snowHighChance;
-  const amountIcon = isRain ? (
-    <CloudRain size={18} color={amountColor} strokeWidth={2.25} />
-  ) : (
-    <Snowflake size={18} color={amountColor} strokeWidth={2.25} />
-  );
-
-  metrics.push({
-    key: "precip",
-    label: amountLabel,
-    value: point ? (hasAmount ? `${amountValue}"` : '0"') : placeholder,
-    color: amountColor,
-    icon: amountIcon,
-  });
-
-  const snowChanceValue = !point
-    ? placeholder
-    : point.precipitationType === "snow"
-      ? `${point.precipProbability ?? 0}%`
-      : point.precipitationType === "none"
-        ? "0%"
-        : placeholder;
-  const rainChanceValue = !point
-    ? placeholder
-    : point.precipitationType === "rain"
-      ? `${point.precipProbability ?? 0}%`
-      : point.precipitationType === "none"
-        ? "0%"
-        : placeholder;
-
-  metrics.push({
-    key: "snow-chance",
-    label: "Snow chance",
-    value: snowChanceValue,
-    color: chartColors.snowHighChance,
-    icon: <Snowflake size={18} color={chartColors.snowHighChance} strokeWidth={2.25} />,
-  });
-
-  metrics.push({
-    key: "rain-chance",
-    label: "Rain chance",
-    value: rainChanceValue,
-    color: chartColors.rain,
-    icon: <Droplets size={18} color={chartColors.rain} strokeWidth={2.25} />,
-  });
-
-  return metrics;
-};
-
-type ChartInteractionPayload = {
-  activeTooltipIndex?: number;
-  activeLabel?: string;
-  activePayload?: Array<{ payload?: ChartPoint }>;
-} | null;
-
-const resolveChartIndex = (payload: ChartInteractionPayload, chartData: ChartPoint[]) => {
-  if (!payload) return null;
-  if (typeof payload.activeTooltipIndex === "number") return payload.activeTooltipIndex;
-  if (payload.activeLabel) {
-    const labelIndex = chartData.findIndex((point) => point.time === payload.activeLabel);
-    if (labelIndex >= 0) return labelIndex;
-  }
-  const payloadPoint = payload.activePayload?.[0]?.payload;
-  if (!payloadPoint) return null;
-  const matchIndex = chartData.findIndex(
-    (point) => point.time === payloadPoint.time && point.startTime === payloadPoint.startTime,
-  );
-  return matchIndex >= 0 ? matchIndex : null;
 };
 
 type ForecastLegendProps = {

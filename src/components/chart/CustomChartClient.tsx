@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { Grid, Stack, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   buildBluebirdWindows,
   buildChartData,
@@ -9,13 +12,10 @@ import {
   buildXAxisTicks,
   createTimeFormatters,
   lineSeries,
-} from "@/components/customChartData";
-import { BluebirdPanel, ChartPanel, WarningsPanel } from "@/components/CustomChartPanels";
-import type { ForecastPoint } from "@/data/weather/forecastTypes";
+} from "@/components/chart/customChartData";
+import { BluebirdPanel, ChartPanel, WarningsPanel } from "@/components/chart/CustomChartPanels";
 import type { TimeZoneId } from "@/data/timeZones";
-import { Grid, Stack, useMediaQuery } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import { useState } from "react";
+import type { ForecastPoint } from "@/data/weather/forecastTypes";
 
 type CustomChartClientProps = {
   data: ForecastPoint[];

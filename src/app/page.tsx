@@ -1,44 +1,13 @@
-import LocationMenu from "@/components/LocationMenu";
-import SnowForecast from "@/components/SnowForecast";
-import { surfaceGradient } from "@/data/chartStyles";
-import {
-  forecastLocations,
-  forecastStates,
-  getForecastLocation,
-  getForecastLocationsForState,
-} from "@/data/forecastLocations";
-import { Box, Button, Container, Paper, Stack, Typography } from "@mui/material";
 import { Suspense } from "react";
-
-type SearchParams = {
-  location?: string | string[];
-};
+import { Box, Container, Paper, Stack, Typography } from "@mui/material";
+import PageFooter from "@/app/_components/PageFooter";
+import { resolveForecastSelection, type SearchParams } from "@/app/_lib/forecastSelection";
+import SnowForecast from "@/components/SnowForecast";
+import LocationMenu from "@/components/location/LocationMenu";
+import { surfaceGradient } from "@/data/chartStyles";
 
 type PageProps = {
   searchParams?: SearchParams | Promise<SearchParams>;
-};
-
-const resolveParam = (value?: string | string[]) => (Array.isArray(value) ? value[0] : value);
-
-const resolveForecastSelection = (searchParams?: SearchParams) => {
-  const locationParam = resolveParam(searchParams?.location);
-  const locationFromParam = getForecastLocation(locationParam);
-  const resolvedState = locationFromParam.state;
-  const stateLocations = getForecastLocationsForState(resolvedState);
-  const location =
-    stateLocations.find((item) => item.id === locationFromParam.id) ?? stateLocations[0] ?? locationFromParam;
-  const timeZoneValue = location.timeZoneId;
-
-  return {
-    locationId: location.id,
-    timeZoneValue,
-    menu: {
-      locations: forecastLocations,
-      states: forecastStates,
-      stateValue: resolvedState,
-      value: location.id,
-    },
-  };
 };
 
 export default async function Page({ searchParams }: PageProps) {
@@ -72,30 +41,7 @@ export default async function Page({ searchParams }: PageProps) {
             <SnowForecast locationId={locationId} timeZoneId={timeZoneValue} />
           </Suspense>
 
-          <Box
-            component="footer"
-            sx={{
-              mt: { xs: 4, md: 5 },
-              pt: 2,
-              borderTop: "1px solid rgba(226, 232, 255, 0.2)",
-            }}
-          >
-            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="space-between" spacing={2}>
-              <Typography variant="body2" color="text.secondary">
-                {`© ${new Date().getFullYear()} Jeremiah Barrar`}
-              </Typography>
-              <Button
-                href="https://github.com/barrar/powder-meter"
-                target="_blank"
-                rel="noreferrer"
-                color="primary"
-                variant="contained"
-                sx={{ textTransform: "none" }}
-              >
-                Source Code on GitHub
-              </Button>
-            </Stack>
-          </Box>
+          <PageFooter />
         </Stack>
       </Container>
     </Box>

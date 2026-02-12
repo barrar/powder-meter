@@ -1,4 +1,4 @@
-import CustomChartClient from "@/components/CustomChartClient";
+import CustomChartClient from "@/components/chart/CustomChartClient";
 import type { ForecastLocationId } from "@/data/forecastLocations";
 import { getWeatherData } from "@/data/getWeatherData";
 import type { TimeZoneId } from "@/data/timeZones";
