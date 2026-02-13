@@ -28,7 +28,7 @@ export default async function Page({ searchParams }: PageProps) {
           >
             <Stack spacing={3}>
               <Stack spacing={1}>
-                <Typography variant="h3" component="h1">
+                <Typography variant="h3" component="h1" sx={{ fontSize: "2rem" }}>
                   Powder Meter
                 </Typography>
                 <Typography variant="body1">A quick, visual snow-centric forecast</Typography>
