@@ -1,6 +1,12 @@
 import type { LabelProps } from "recharts";
 import type { ChartPoint } from "@/components/chart/customChartData";
-import { chartColors } from "@/data/chartStyles";
+
+const minSnowBarOpacity = 0.3;
+const maxSnowBarOpacity = 1;
+const minRainBarOpacity = 0.3;
+const maxRainBarOpacity = 1;
+const lowRainChanceThreshold = 30;
+const highRainChanceThreshold = 80;
 
 export const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
   if (value == null) return null;
@@ -43,11 +49,16 @@ export const renderSnowLabel = ({ x, y, width, value }: LabelProps) => {
   );
 };
 
-export const resolveSnowBarColor = (point: ChartPoint) => {
+export const resolveSnowBarOpacity = (point: ChartPoint) => {
   const chance = point.precipProbability;
-  if (chance != null && Number.isFinite(chance)) {
-    if (chance >= 70) return chartColors.snowHighChance;
-    if (chance >= 40) return chartColors.snow;
-  }
-  return chartColors.snowLowChance;
+  if (chance == null || !Number.isFinite(chance)) return minSnowBarOpacity;
+  return Math.min(maxSnowBarOpacity, Math.max(minSnowBarOpacity, chance / 100));
+};
+
+export const resolveRainBarOpacity = (point: ChartPoint) => {
+  const chance = point.precipProbabilityChart ?? point.precipProbability;
+  if (chance == null || !Number.isFinite(chance)) return minRainBarOpacity;
+  if (chance <= lowRainChanceThreshold) return minRainBarOpacity;
+  if (chance >= highRainChanceThreshold) return maxRainBarOpacity;
+  return chance / 100;
 };

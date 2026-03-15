@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
 import { Cloud, CloudRain, Thermometer, Wind } from "lucide-react";
-import { Bar, Cell, ComposedChart, LabelList, Line, ResponsiveContainer, XAxis, YAxis } from "recharts";
+import { Bar, Cell, ComposedChart, Customized, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { resolveChartIndex, type ChartInteractionPayload } from "@/components/chart/chartInteraction";
 import { buildPrecipMetrics } from "@/components/chart/legendMetrics";
-import { renderSnowLabel, resolveSnowBarColor } from "@/components/chart/snowChartPresentation";
+import { renderSnowLabel, resolveRainBarOpacity, resolveSnowBarOpacity } from "@/components/chart/snowChartPresentation";
 import type { BluebirdWindow, ChartMargin, ChartPoint, LineSeries, WarningDetail } from "@/components/chart/customChartData";
 import { chartColors, surfaceGradient } from "@/data/chartStyles";
 
@@ -489,7 +489,7 @@ const ChartSurface = ({
                 barSize={22}
               >
                 {chartData.map((point) => (
-                  <Cell key={`rain-${point.time}`} fill={chartColors.rain} />
+                  <Cell key={`rain-${point.time}`} fill={chartColors.rain} fillOpacity={resolveRainBarOpacity(point)} />
                 ))}
               </Bar>
               {lineSeries.map((series) => (
@@ -502,11 +502,12 @@ const ChartSurface = ({
                   stroke={series.color}
                   strokeWidth={2}
                   dot={false}
+                  activeDot={false}
                 />
               ))}
               <Bar yAxisId="snow" dataKey="snowChart" name="Snow (in)" fill={chartColors.snow} barSize={22}>
                 {chartData.map((point) => (
-                  <Cell key={point.time} fill={resolveSnowBarColor(point)} />
+                  <Cell key={point.time} fill={chartColors.snowHighChance} fillOpacity={resolveSnowBarOpacity(point)} />
                 ))}
                 <LabelList dataKey="snowChart" content={renderSnowLabel} />
               </Bar>
