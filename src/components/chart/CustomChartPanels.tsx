@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Box, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
 import { Cloud, CloudRain, Thermometer, Wind } from "lucide-react";
-import { Bar, Cell, ComposedChart, Customized, LabelList, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, Cell, ComposedChart, LabelList, Line, ReferenceLine, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { resolveChartIndex, type ChartInteractionPayload } from "@/components/chart/chartInteraction";
 import { buildPrecipMetrics } from "@/components/chart/legendMetrics";
 import { renderSnowLabel, resolveRainBarOpacity, resolveSnowBarOpacity } from "@/components/chart/snowChartPresentation";
@@ -21,6 +21,9 @@ const chartPanelSx = {
   background: surfaceGradient,
   boxShadow: "0 24px 60px rgba(6, 12, 28, 0.45)",
 };
+
+const precipitationBarSize = 22;
+const centeredBarOverlap = -precipitationBarSize;
 
 type ForecastLegendProps = {
   point: ChartPoint | null;
@@ -187,6 +190,7 @@ type ChartSurfaceProps = {
   chartHeight: number;
   chartMargin: ChartMargin;
   lineSeries: LineSeries[];
+  activePoint: ChartPoint | null;
   onSelectPoint: (index: number) => void;
 };
 
@@ -211,6 +215,9 @@ const initialScrollMetrics: ScrollMetrics = {
   scrollable: false,
 };
 
+const toEpochMs = (value: string) => new Date(value).getTime();
+const getPointStartMs = (point: ChartPoint) => toEpochMs(point.time);
+
 const buildDaySegments = (chartData: ChartPoint[]): DaySegment[] => {
   if (!chartData.length) return [];
 
@@ -224,9 +231,10 @@ const buildDaySegments = (chartData: ChartPoint[]): DaySegment[] => {
   >((acc, point, index) => {
     const previous = acc[acc.length - 1];
     if (!previous || previous.key !== point.dateLabel) {
+      const shortDayName = point.dayLabel.slice(0, 3);
       acc.push({
         key: point.dateLabel,
-        dayName: point.dateLabel.split(",")[0] || point.dateLabel,
+        dayName: shortDayName || point.dateLabel.split(",")[0] || point.dateLabel,
         startIndex: index,
         endIndex: index,
       });
@@ -340,10 +348,15 @@ const ChartSurface = ({
   chartHeight,
   chartMargin,
   lineSeries,
+  activePoint,
   onSelectPoint,
 }: ChartSurfaceProps) => {
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const [scrollMetrics, setScrollMetrics] = useState<ScrollMetrics>(initialScrollMetrics);
+  const chartStartMs = chartData.length ? toEpochMs(chartData[0].time) : 0;
+  const chartEndMs = chartData.length ? chartData[chartData.length - 1].endTimeMs : chartStartMs;
+  const selectedRangeMidpointMs =
+    activePoint != null ? Math.round((toEpochMs(activePoint.time) + activePoint.endTimeMs) / 2) : null;
 
   const syncScrollMetrics = () => {
     const element = scrollContainerRef.current;
@@ -454,7 +467,7 @@ const ChartSurface = ({
             <ComposedChart
               data={chartData}
               margin={chartMargin}
-              barGap={-16}
+              barGap={centeredBarOverlap}
               barCategoryGap="30%"
               onMouseMove={(event) => {
                 const index = resolveChartIndex(event as ChartInteractionPayload, chartData);
@@ -479,14 +492,24 @@ const ChartSurface = ({
                 axisLine={{ stroke: "rgba(203, 213, 245, 0.35)" }}
                 tickLine={{ stroke: "rgba(203, 213, 245, 0.35)" }}
               />
+              <XAxis
+                xAxisId="selectionRange"
+                dataKey={getPointStartMs}
+                type="number"
+                scale="time"
+                hide
+                domain={[chartStartMs, chartEndMs]}
+                allowDataOverflow
+              />
               <YAxis yAxisId="snow" hide domain={[0, "auto"]} padding={{ top: 20 }} />
               <YAxis yAxisId="weather" hide domain={[0, 100]} />
               <Bar
+                xAxisId={0}
                 yAxisId="weather"
                 dataKey="precipProbabilityChart"
                 name="Precip chance (%)"
                 fill={chartColors.rain}
-                barSize={22}
+                barSize={precipitationBarSize}
               >
                 {chartData.map((point) => (
                   <Cell key={`rain-${point.time}`} fill={chartColors.rain} fillOpacity={resolveRainBarOpacity(point)} />
@@ -495,6 +518,7 @@ const ChartSurface = ({
               {lineSeries.map((series) => (
                 <Line
                   key={series.id}
+                  xAxisId={0}
                   yAxisId="weather"
                   type="linear"
                   dataKey={series.dataKey}
@@ -505,12 +529,30 @@ const ChartSurface = ({
                   activeDot={false}
                 />
               ))}
-              <Bar yAxisId="snow" dataKey="snowChart" name="Snow (in)" fill={chartColors.snow} barSize={22}>
+              <Bar
+                xAxisId={0}
+                yAxisId="snow"
+                dataKey="snowChart"
+                name="Snow (in)"
+                fill={chartColors.snow}
+                barSize={precipitationBarSize}
+              >
                 {chartData.map((point) => (
                   <Cell key={point.time} fill={chartColors.snowHighChance} fillOpacity={resolveSnowBarOpacity(point)} />
                 ))}
                 <LabelList dataKey="snowChart" content={renderSnowLabel} />
               </Bar>
+              {selectedRangeMidpointMs != null ? (
+                <ReferenceLine
+                  xAxisId="selectionRange"
+                  yAxisId="weather"
+                  x={selectedRangeMidpointMs}
+                  stroke="rgba(147, 197, 253, 0.95)"
+                  strokeWidth={2}
+                  strokeDasharray="6 6"
+                  zIndex={1000}
+                />
+              ) : null}
             </ComposedChart>
           </ResponsiveContainer>
         </Box>
@@ -573,6 +615,7 @@ export const ChartPanel = ({
       chartHeight={chartHeight}
       chartMargin={chartMargin}
       lineSeries={lineSeries}
+      activePoint={activePoint}
       onSelectPoint={onSelectPoint}
     />
   </Paper>
